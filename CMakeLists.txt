@@ -19,6 +19,6 @@ add_executable(FissionOpt
 )
 
 target_include_directories(FissionOpt PRIVATE
-  ../xtensor/include
-  ../xtl/include
+  ${CMAKE_SOURCE_DIR}/xtensor/include
+  ${CMAKE_SOURCE_DIR}/xtl/include
 )

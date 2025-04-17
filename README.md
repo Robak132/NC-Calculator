@@ -1,3 +1,13 @@
 Web version: https://leu-235.com/ (Built using emscripten. See [web/compile.bat](web/compile.bat) for details.)
 
-To build the benchmark, clone [xtl](https://github.com/xtensor-stack/xtl) and [xtensor](https://github.com/xtensor-stack/xtensor) to the parent directory of this repo and run CMake.
+To build the benchmark,
+
+```sh
+git submodule update --init
+
+mkdir build
+cd build
+cmake ..
+```
+
+If you get errors that `xtensor` or `xtl` include files cannot be found, you have likely not run `git submodule update --init`.
