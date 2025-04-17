@@ -1,2 +1,7 @@
+# Suggested cmake binary directory
 build/
+
+# Output files generated in our source tree
+web/FissionOpt.js
+web/FissionOpt.wasm
 
