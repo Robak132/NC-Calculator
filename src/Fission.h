@@ -1,7 +1,6 @@
 #ifndef _FISSION_H_
 #define _FISSION_H_
-#include <xtensor/xtensor.hpp>
-#include <string>
+#include <xtensor/containers/xtensor.hpp>
 
 namespace Fission {
   using Coords = std::vector<std::tuple<int, int, int>>;
@@ -11,11 +10,24 @@ namespace Fission {
 
   enum {
     // Cooler
-    Water, Redstone, Quartz, Gold, Glowstone,
-    Lapis, Diamond, Helium, Enderium, Cryotheum,
-    Iron, Emerald, Copper, Tin, Magnesium, Active,
+    Water, Redstone, Quartz,
+    Gold, Glowstone, Lapis,
+    Diamond, Helium, Enderium,
+    Cryotheum, Iron, Emerald,
+    Copper, Tin, Magnesium,
+    // New in NC Neoteric:
+    Aluminium, Arsenic, Boron,
+    Endstone, Fluorite, Lead,
+    Nitrogen, Lithium, Manganese,
+    Netherbrick, Netherite, Obsidian,
+    Prismarine, Purpur, Silver,
+    Slime,
+    // Active variants
+    Active,
     // Other
-    Cell = Active * 2, Moderator, Air
+    Cell = Active * 2, Moderator,
+    // Air must be last
+    Air
   };
 
   enum {
@@ -42,7 +54,7 @@ namespace Fission {
     int breed;
     // Computed
     double heat, netHeat, dutyCycle, avgMult, power, avgPower, avgBreed, efficiency;
-
+    double fitness;
     void compute(const Settings &settings);
   };
 
@@ -58,6 +70,7 @@ namespace Fission {
     bool countMult(int x, int y, int z, int dx, int dy, int dz);
     int countMult(int x, int y, int z);
     bool isActiveSafe(int tile, int x, int y, int z) const;
+    bool isBetweenSafe(int tile, int x, int y, int z) const;
     int countActiveNeighbors(int tile, int x, int y, int z) const;
     bool isTileSafe(int tile, int x, int y, int z) const;
     int countNeighbors(int tile, int x, int y, int z) const;

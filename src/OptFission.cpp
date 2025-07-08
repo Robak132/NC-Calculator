@@ -1,4 +1,8 @@
-#include <xtensor/xview.hpp>
+#include "OptFission.h"
+#include <array>
+#include <cmath>
+#include <vector>
+#include <xtensor/views/xview.hpp>
 #include "FissionNet.h"
 
 namespace Fission {
@@ -44,13 +48,13 @@ namespace Fission {
     evaluator.run(best.state, best.value);
   }
 
-  bool Opt::feasible(const Evaluation &x) {
+  bool Opt::feasible(const Evaluation &x) const {
     return !settings.ensureHeatNeutral || x.netHeat <= 0.0;
   }
 
-  double Opt::rawFitness(const Evaluation &x) {
+  double Opt::rawFitness(const Evaluation &x) const {
     switch (settings.goal) {
-      default: // GoalPower
+      default:
         return x.avgMult;
       case GoalBreeder:
         return x.avgBreed;
@@ -59,19 +63,20 @@ namespace Fission {
     }
   }
 
-  double Opt::currentFitness(const Sample &x) {
+  double Opt::currentFitness(Sample &x) const {
     if (nStage == StageInfer) {
       return net->infer(x);
     } else if (nStage == StageTrain) {
       return 0.0;
     } else if (feasible(x.value)) {
-      return rawFitness(x.value);
+      x.value.fitness = rawFitness(x.value);
     } else {
-      return rawFitness(x.value) - x.value.netHeat / settings.fuelBaseHeat * infeasibilityPenalty;
+      x.value.fitness = rawFitness(x.value) * 2 * std::erf( - x.value.netHeat / settings.fuelBaseHeat * infeasibilityPenalty);
     }
+    return x.value.fitness;
   }
 
-  int Opt::getNSym(int x, int y, int z) {
+  int Opt::getNSym(int x, int y, int z) const {
     int result(1);
     if (settings.symX && x != settings.sizeX - x - 1)
       result *= 2;
@@ -82,7 +87,7 @@ namespace Fission {
     return result;
   }
 
-  void Opt::setTileWithSym(Sample &sample, int x, int y, int z, int tile) {
+  void Opt::setTileWithSym(Sample &sample, int x, int y, int z, int tile) const {
     sample.state(x, y, z) = tile;
     if (settings.symX) {
       sample.state(settings.sizeX - x - 1, y, z) = tile;
@@ -118,8 +123,12 @@ namespace Fission {
     allowedTiles.clear();
     allowedTiles.emplace_back(Air);
     for (int tile{}; tile < Air; ++tile)
-      if (sample.limit[tile] < 0 || sample.limit[tile] >= nSym)
+      if (sample.limit[tile] < 0 || sample.limit[tile] >= nSym) {
         allowedTiles.emplace_back(tile);
+        if (tile == Cell && ((x + y + z) % 2 == 1)) {
+          allowedTiles.emplace_back(tile);
+        }
+      }
     int newTile(allowedTiles[std::uniform_int_distribution<>(0, static_cast<int>(allowedTiles.size() - 1))(rng)]);
     if (newTile != Air)
       sample.limit[newTile] -= nSym;
@@ -182,8 +191,8 @@ namespace Fission {
       xDist(0, settings.sizeX - 1),
       yDist(0, settings.sizeY - 1),
       zDist(0, settings.sizeZ - 1);
-    int bestChild;
-    double bestFitness;
+    int bestChild = 0;
+    double bestFitness = 0.0;
     for (int i{}; i < children.size(); ++i) {
       auto &child(children[i]);
       child.state = parent.state;

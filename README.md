@@ -1,4 +1,4 @@
-Web version: https://leu-235.com/ (Built using emscripten. See [web/compile.bat](web/compile.bat) for details.)
+Web version: https://leu-235.com/ (Built using emscripten. See [web/compile.bat](compile.bat) for details.)
 
 To build the benchmark,
 

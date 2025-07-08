@@ -1,6 +1,9 @@
 [submodule "xtl"]
-	path = xtl
-	url = https://github.com/xtensor-stack/xtl
+	path = lib/xtl
+	url = https://github.com/xtensor-stack/xtl.git
 [submodule "xtensor"]
-	path = xtensor
-	url = https://github.com/xtensor-stack/xtensor
+	path = lib/xtensor
+	url = https://github.com/xtensor-stack/xtensor.git
+[submodule "lib/emscripten"]
+	path = lib/emscripten
+	url = https://github.com/emscripten-core/emscripten.git

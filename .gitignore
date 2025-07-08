@@ -5,3 +5,5 @@ build/
 web/FissionOpt.js
 web/FissionOpt.wasm
 
+.vscode/
+.idea/

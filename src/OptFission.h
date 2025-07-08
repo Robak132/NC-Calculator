@@ -40,11 +40,11 @@ namespace Fission {
     std::vector<double> lossHistory;
     bool lossChanged;
     void restart();
-    bool feasible(const Evaluation &x);
-    double rawFitness(const Evaluation &x);
-    double currentFitness(const Sample &x);
-    int getNSym(int x, int y, int z);
-    void setTileWithSym(Sample &sample, int x, int y, int z, int tile);
+    bool feasible(const Evaluation &x) const;
+    double rawFitness(const Evaluation &x) const;
+    double currentFitness(Sample &x) const;
+    int getNSym(int x, int y, int z) const;
+    void setTileWithSym(Sample &sample, int x, int y, int z, int tile) const;
     void mutateAndEvaluate(Sample &sample, int x, int y, int z);
   public:
     Opt(const Settings &settings, bool useNet);

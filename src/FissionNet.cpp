@@ -1,4 +1,4 @@
-#include <xtensor/xrandom.hpp>
+#include <xtensor/generators/xrandom.hpp>
 #include "FissionNet.h"
 
 namespace Fission {
