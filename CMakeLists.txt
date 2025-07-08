@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 project(FissionOpt)
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_executable(FissionOpt
   Fission.h
@@ -18,7 +19,7 @@ add_executable(FissionOpt
   OverhaulFissionNet.cpp
 )
 
-target_include_directories(FissionOpt PRIVATE
-  ${CMAKE_SOURCE_DIR}/xtensor/include
-  ${CMAKE_SOURCE_DIR}/xtl/include
+target_include_directories(FissionOpt SYSTEM PRIVATE
+  ${CMAKE_SOURCE_DIR}/xtensor/include/xtensor
+  ${CMAKE_SOURCE_DIR}/xtl/include/xtl
 )
