@@ -33,8 +33,6 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
-#      - name: Change permissions
-#        run: chmod +x web/compile.sh
       - name: Compile
         run: web/compile.sh
       - name: Upload artifact
