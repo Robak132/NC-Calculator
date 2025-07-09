@@ -35,7 +35,10 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Compile
-        run: chmod +x web/compile.sh && web/compile.sh
+        run: |
+          cd web
+          chmod +x compile.sh
+          . compile.sh
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
