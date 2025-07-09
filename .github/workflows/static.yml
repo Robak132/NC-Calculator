@@ -34,13 +34,14 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
+      - name: Move to web directory
+        run: cd web
       - name: Print directory
         run: ls -la
       - name: Compile
         run: |
-          cd web
           chmod +x compile.sh
-          compile.sh
+          ./compile.sh
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
