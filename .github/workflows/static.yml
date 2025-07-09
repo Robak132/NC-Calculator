@@ -28,13 +28,14 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    container: emscripten/emsdk
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Compile
-        run: web/compile.sh
+        run: chmod +x web/compile.sh && web/compile.sh
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
