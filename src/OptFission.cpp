@@ -1,6 +1,5 @@
 #include "OptFission.h"
 #include <array>
-#include <cmath>
 #include <vector>
 #include <xtensor/views/xview.hpp>
 #include "FissionNet.h"
@@ -55,7 +54,7 @@ namespace Fission {
   double Opt::rawFitness(const Evaluation &x) const {
     switch (settings.goal) {
       default:
-        return x.avgMult;
+        return x.avgPower;
       case GoalBreeder:
         return x.avgBreed;
       case GoalEfficiency:
@@ -63,17 +62,16 @@ namespace Fission {
     }
   }
 
-  double Opt::currentFitness(Sample &x) const {
+  double Opt::currentFitness(const Sample &x) const {
     if (nStage == StageInfer) {
       return net->infer(x);
     } else if (nStage == StageTrain) {
       return 0.0;
     } else if (feasible(x.value)) {
-      x.value.fitness = rawFitness(x.value);
+      return rawFitness(x.value);
     } else {
-      x.value.fitness = rawFitness(x.value) * 2 * std::erf( - x.value.netHeat / settings.fuelBaseHeat * infeasibilityPenalty);
+      return rawFitness(x.value) - x.value.netHeat / settings.fuelBaseHeat * infeasibilityPenalty;
     }
-    return x.value.fitness;
   }
 
   int Opt::getNSym(int x, int y, int z) const {
@@ -123,12 +121,8 @@ namespace Fission {
     allowedTiles.clear();
     allowedTiles.emplace_back(Air);
     for (int tile{}; tile < Air; ++tile)
-      if (sample.limit[tile] < 0 || sample.limit[tile] >= nSym) {
+      if (sample.limit[tile] < 0 || sample.limit[tile] >= nSym)
         allowedTiles.emplace_back(tile);
-        if (tile == Cell && ((x + y + z) % 2 == 1)) {
-          allowedTiles.emplace_back(tile);
-        }
-      }
     int newTile(allowedTiles[std::uniform_int_distribution<>(0, static_cast<int>(allowedTiles.size() - 1))(rng)]);
     if (newTile != Air)
       sample.limit[newTile] -= nSym;

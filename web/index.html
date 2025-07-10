@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>NuclearCraft Fission Reactor Design Generator</title>
+    <title>NuclearCraft: Neoteric Fission Reactor Design Generator</title>
     <link rel="stylesheet" href="main.css"/>
     <script src="https://code.jquery.com/jquery-3.5.0.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
@@ -12,21 +12,21 @@
   <body>
     <header>
       <div>
-        <h2>NuclearCraft Fission Reactor Design Generator</h2>by cyb0124, modified by Tadyen, Robak132, Exphp-forks,
-        <a href="https://github.com/cyb0124/FissionOpt">source</a>
+        <h2>NuclearCraft Fission Reactor Design Generator</h2>by cyb0124, modified by Tadyen, Robak132, Exphp-forks, miclol,
+        <a href="https://github.com/Robak132/NC-Calculator">source</a>
       </div>
       <div>
         This tool generates a fission reactor design that maximizes effective power output, breeding speed or efficiency.
         Modified for use for <a href="https://github.com/ThePansmith/Monifactory">Monifactory 0.12.9</a> modpack.
       </div>
     </header>
-    <section>
+    <section id="settings">
       <div>
         <b>Step 1</b>: Input the core (interior) size of the reactor:
         <input type="text" id="sizeZ"> &times; <input type="text" id="sizeX"> &times; <input type="text" id="sizeY">
       </div>
       <div>
-        <b>Step 2</b>: Select the fuel to be used, or manually input fuel specifications.
+        <b>Step 2</b>: Click on the fuel you want to use in the table below. Alternatively, you can manually enter the fuel data in the textboxes below.
         <div>Fuel Base Power: <input type="text" id="fuelBasePower"> RF/t</div>
         <div>Fuel Base Heat: <input text="text" id="fuelBaseHeat"> H/t</div>
         <div class="fuelPresets"><table>
@@ -72,87 +72,127 @@
       <div>
         <b>Step 3</b>: If you want to limit the usage of a type of block, enter the maximum number allowed in the table below.
         Enter zero to completely disable that block. You can hover over the acronym to see the full name of each block.
-        Active coolers are disabled by default. You can enable them by removing the zeros.
-        <table>
-          <thead><tr id="blockType"><th>Block Type</th>
-            <th class="Wt">Wt</th><th class="Rs">Rs</th><th class="Qz">Qz</th>
-            <th class="Au">Au</th><th class="Gs">Gs</th><th class="Lp">Lp</th>
-            <th class="Dm">Dm</th><th class="He">He</th><th class="Ed">Ed</th>
-            <th class="Cy">Cy</th><th class="Fe">Fe</th><th class="Em">Em</th>
-            <th class="Cu">Cu</th><th class="Sn">Sn</th><th class="Mg">Mg</th>
-            <th class="Al">Al</th><th class="As">As</th><th class="B">B</th>
-            <th class="ES">ES</th><th class="Ft">Ft</th><th class="Pb">Pb</th>
-            <th class="N">N</th><th class="Li">Li</th><th class="Mn">Mn</th>
-            <th class="NB">NB</th><th class="Nr">Nr</th><th class="Ob">Ob</th>
-            <th class="Pm">Pm</th><th class="Pp">Pp</th><th class="Ag">Ag</th>
-            <th class="Sl">Sl</th>
-            <th class="cell">[]</th><th class="mod">##</th>
-          </tr></thead>
-          <tbody>
-            <tr id="rate"><th>Cooling Rate (H/t)</th>
-              <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-              <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-              <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-              <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-              <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-              <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-              <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-              <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-              <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-              <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-              <td><input type="text"></td>
-              <td>&mdash;</td><td>&mdash;</td>
-            </tr>
-            <tr id="limit"><th>Max Allowed</th>
-              <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-              <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-              <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-              <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-              <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-              <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-              <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-              <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-              <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-              <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-              <td><input type="text"></td>
-              <td><input type="text"></td><td><input type="text"></td><td>
-            </tr>
-            <tr id="activeRate"><th>Active Rate (H/t)</th>
-              <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-              <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-              <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-              <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-              <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-              <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-              <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-              <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-              <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-              <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-              <td><input type="text"></td>
-              <td>&mdash;</td><td>&mdash;</td>
-            </tr>
-            <tr id="activeLimit"><th>Max Active Allowed</th>
-              <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
-              <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
-              <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
-              <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
-              <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
-              <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
-              <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
-              <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
-              <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
-              <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
-              <td><input type="text" value="0"></td>
-              <td>&mdash;</td><td>&mdash;</td>
-            </tr>
-          </tbody>
-        </table>
+        Active coolers are disabled by default. You can enable them by removing the zeros. <b><i>NOTE: Irradiators are not supported.</i></b>
+      </div>
+      <div class="tables"><table>
+        <thead><tr id="blockType"><th>Block Type</th>
+          <th class="Wt">Wt</th><th class="Rs">Rs</th><th class="He">He</th>
+          <th class="Ed">Ed</th><th class="Cr">Cr</th><th class="Nt">Nt</th>
+          <th class="Qz">Qz</th><th class="Au">Au</th><th class="Gs">Gs</th>
+          <th class="Lp">Lp</th><th class="Dm">Dm</th><th class="Fe">Fe</th>
+          <th class="Em">Em</th><th class="Cu">Cu</th><th class="Sn">Sn</th>
+          <th class="Mg">Mg</th><th class="Mn">Mn</th><th class="En">En</th>
+          <th class="As">As</th><th class="Pm">Pm</th><th class="Ob">Ob</th>
+          <th class="Al">Al</th><th class="Vi">Vi</th><th class="Bo">Bo</th>
+          <th class="Ag">Ag</th><th class="Fl">Fl</th><th class="Nr">Nr</th>
+          <th class="Pb">Pb</th><th class="Pr">Pr</th><th class="Sm">Sm</th>
+          <th class="Li">Li</th><th class="cell">[]</th><th class="mod">##</th>
+        </tr></thead>
+        <tbody>
+          <tr id="rate"><th>Cooling Rate (H/t)</th>
+            <td><input type="text" value="60"></td><td><input type="text" value="90"></td><td><input type="text" value="140"></td>
+            <td><input type="text" value="120"></td><td><input type="text" value="160"></td><td><input type="text" value="185"></td>
+            <td><input type="text" value="90"></td><td><input type="text" value="120"></td><td><input type="text" value="130"></td>
+            <td><input type="text" value="120"></td><td><input type="text" value="150"></td><td><input type="text" value="80"></td>
+            <td><input type="text" value="160"></td><td><input type="text" value="80"></td><td><input type="text" value="120"></td>
+            <td><input type="text" value="110"></td><td><input type="text" value="150"></td><td><input type="text" value="40"></td>
+            <td><input type="text" value="135"></td><td><input type="text" value="115"></td><td><input type="text" value="40"></td>
+            <td><input type="text" value="175"></td><td><input type="text" value="180"></td><td><input type="text" value="160"></td>
+            <td><input type="text" value="170"></td><td><input type="text" value="160"></td><td><input type="text" value="70"></td>
+            <td><input type="text" value="60"></td><td><input type="text" value="95"></td><td><input type="text" value="145"></td>
+            <td><input type="text" value="130"></td><td>&mdash;</td><td>&mdash;</td>
+          </tr>
+          <tr id="limit"><th>Max Allowed</th>
+            <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
+            <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
+          </tr>
+          <tr id="activeRate"><th>Active Rate (H/t)</th>
+            <td><input type="text" value="250"></td><td><input type="text" value="270"></td><td><input type="text" value="420"></td>
+            <td><input type="text" value="360"></td><td><input type="text" value="480"></td><td><input type="text" value="555"></td>
+            <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
+            <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
+            <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
+            <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
+            <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
+            <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
+            <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
+            <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
+            <td><input type="text" value="0"><td>&mdash;</td><td>&mdash;</td>
+          </tr>
+          <tr id="activeLimit"><th>Max Active Allowed</th>
+            <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
+            <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
+            <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
+            <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
+            <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
+            <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
+            <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
+            <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
+            <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
+            <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
+            <td><input type="text" value="0"><td>&mdash;</td><td>&mdash;</td>
+          </tr>
+        </tbody>
+      </table></div>
+      <div>
+        <b>Step 4</b>: If you want the generator to factor in the biome you are building this in, select the biome from the dropdown menu below.
+        Otherwise, leave the dropdown and textbox as is. Alternatively, you can manually enter the biome temperature in the textbox below.
+      </div>
+      <div>Biome Temperature: <input type="text" id="temperature" value="2"></div>
+      <select id="temperatureList">
+        <option value="2">Select Biome:</option>
+        <optgroup label="Overworld">
+          <option value="2">Badlands</option><option value="0.95">Bamboo Jungle</option><option value="0.8">Beach</option>
+          <option value="0.6">Birch Forest</option><option value="0.5">Cherry Grove</option><option value="0.5">Cold Ocean</option>
+          <option value="0.7">Dark Forest</option><option value="0.5">Deep Cold Ocean</option><option value="0.8">Deep Dark</option>
+          <option value="0.5">Deep Frozen Ocean</option><option value="0.5">Deep Lukewarm Ocean</option><option value="0.5">Deep Ocean</option>
+          <option value="2">Desert</option><option value="0.8">Dripstone Caves</option><option value="2">Eroded Badlands</option>
+          <option value="0.7">Flower Forest</option><option value="0.7">Forest</option><option value="0">Frozen Ocean</option>
+          <option value="-0.7">Frozen Peaks</option><option value="0">Frozen River</option><option value="-0.2">Grove</option>
+          <option value="0">Ice Spikes</option><option value="-0.7">Jagged Peaks</option><option value="0.95">Jungle</option>
+          <option value="0.5">Lukewarm Ocean</option><option value="0.5">Lush Caves</option><option value="0.8">Mangrove Swamp</option>
+          <option value="0.5">Meadow</option><option value="0.9">Mushroom Fields</option><option value="0.5">Ocean</option>
+          <option value="0.6">Old Growth Birch Forest</option><option value="0.3">Old Growth Pine Taiga</option>
+          <option value="0.25">Old Growth Spruce Taiga</option><option value="0.8">Plains</option><option value="0.5">River</option>
+          <option value="2">Savanna Plateau</option><option value="2">Savanna</option><option value="0.05">Snowy Beach</option>
+          <option value="0">Snowy Plains</option><option value="-0.3">Snowy Slopes</option><option value="-0.5">Snowy Taiga</option>
+          <option value="0.95">Sparse Jungle</option><option value="1">Stony Peaks</option><option value="0.2">Stony Shore</option>
+          <option value="0.8">Sunflower Plains</option><option value="0.8">Swamp</option><option value="0.25">Taiga</option>
+          <option value="0.5">Warm Ocean</option><option value="0.2">Windswept Forest</option><option value="0.2">Windswept Gravelly Hills</option>
+          <option value="0.2">Windswept Hills</option><option value="2">Windswept Savanna</option><option value="2">Wooded Badlands</option>
+        </optgroup>
+        <optgroup label="The Void">
+          <option value="0.5">The Void</option>
+        </optgroup>
+        <optgroup label="The Nether">
+          <option value="2">Any Nether Biome</option>
+        </optgroup>
+        <optgroup label="The End">
+          <option value="0.5">Any End Biome</option>
+        </optgroup>
+      </select>
+      <div class="configs">
+        <b>Step 5</b>: Adjust these settings to match whatever modpack you are using, or leave them as default. All
+        config values can be found in either <i>common.toml</i> or <i>fission.toml</i> in the NuclearCraft config.<br>
+        <label><input type="checkbox" id="altCalc" checked>Nuclearcraft: Neoteric &geq;v1.2.3-rc</label>
+        <div>Generation Multiplier: <input type="text" id="genMult" value="1"></div>
+        <div>Heat Multiplier: <input type="text" id="heatMult" value="1"></div>
+        <div>Moderator FE Multiplier: <input type="text" id="modFEMult" value="16.666666667"></div>
+        <div>Moderator Heat Multiplier: <input type="text" id="modHeatMult" value="33.33333333"></div>
+        <div>FE Generation Multiplier: <input type="text" id="FEGenMult" value="10"></div>
+        <label><input type="checkbox" id="activeHeatsinkPrime" checked>Active Heatsink Prime</label>
       </div>
       <div>
-        <b>Step 4 (Optional)</b>: Cooling rate data can be reset or manually modified here.</div>
-      <div>
-        <b>Step 5</b>: Adjust the options below and click &ldquo;Run&rdquo; to start the optimization.<br>
-        <label><input type="checkbox" id="ensureActiveCoolerAccessible" checked>Ensure active coolers are accessible by piping.</label><br>
+        <b>Step 6</b>: Adjust the options below and click &ldquo;Run&rdquo; to start the optimization.<br>
         <label><input type="checkbox" id="ensureHeatNeutral" checked>Only generate heat neutral reactor.</label><br>
         <label><input type="radio" name="goal" value="0" checked>Optimize for power.</label><br>
         <label><input type="radio" name="goal" value="1">Optimize for breeding (maximize fuel consumption rate).</label><br>
@@ -161,30 +201,28 @@
         <label><input type="checkbox" id="symX" checked>Y symmetry</label>
         <label><input type="checkbox" id="symY" checked>Z symmetry</label><br>
         <label><input type="checkbox" id="useNet" checked>Use reinforcement learning (requires more memory, slightly slower but can produce better design)</label><br>
-      </div>
-      <div>
-        <a href="javascript:" id="run">Run</a>
-        <a href="javascript:" id="pause" class="disabledLink">Pause</a>
-        <a href="javascript:" id="stop" class="disabledLink">Stop</a>
-        <a href="javascript:" id="save" class="disabledLink">Save JSON</a>
-      </div>
-      <div>
-        <div id="progress"></div>
-        <div id="design"></div>
-      </div>
-    </section>
-    <footer>
-      <div>
         The most efficient reactor doesn't produce the most power. To get a efficient reactor that can still generate lots of power,
         you should optimize for power while limiting the cell count using the &ldquo;Max Allowed&rdquo; box for <span class="row cell" title="Reactor Cell">[]</span>.
         To get the ideal cell count, divide the fuel's base processing time by the time you want a fuel to last.
         Enabling symmetry and/or limiting block counts often speeds up the algorithm.
-        The algorithm uses fixed seed: different runs will always yield the same results unless there is an update to the algorithm (last update: 5/19/2020).
-        You can use <a href="https://www.curseforge.com/minecraft/mc-mods/building-gadgets">Building Gadgets</a> to automate the building of your reactor.
-        To do so, save the JSON of your design, load it up in <a href="https://github.com/hellrage/NC-Reactor-Planner/releases/tag/v1.2.25">Hellrage's Reactor Planner</a>,
-        and then click &ldquo;Generate BG string&rdquo;. Then you can paste it in the <a href="https://github.com/Direwolf20-MC/BuildingGadgets/wiki/Template-Manager">Template Manager</a>.<br>
+        The algorithm uses fixed seed: different runs will always yield the same results unless there is an update to the algorithm (last update: 30/6/2025).<br>
+        You can use <a href="https://www.curseforge.com/minecraft/mc-mods/forgematica">Forgematica</a> to automate the building of your reactor. To do so, download the 
+        schematic and put it in the schematics folder of your Minecraft instance. Note that Forgematica also needs <a href="https://www.curseforge.com/minecraft/mc-mods/mafglib">MaFgLib</a> to run.<br>
+        Alternatively, you could also use <a href="https://www.curseforge.com/minecraft/mc-mods/building-gadgets">Building Gadgets</a> to automate the building of your reactor by copying the BG
+        String and pasting it in the Template Manager to create a template.<br>
+        <span style="color:red;">Note: in Chrome, this tab won't run in background! If you want to switch to other tabs, drag this tab out as a dedicated window and don't minimize it.</span>
       </div>
-      <span style="color:red;">Note: in Chrome, this tab won't run in background! If you want to switch to other tabs, drag this tab out as a dedicated window and don't minimize it.</span>
-    </footer>
+    </section>
+    <main>
+      <div>
+        <a href="javascript:;" id="run">Run</a>
+        <a href="javascript:;" id="pause" class="disabledLink">Pause</a>
+        <a href="javascript:;" id="stop" class="disabledLink">Stop</a>
+        <a href="javascript:;" id="save" class="disabledLink">Save Schematic</a>
+        <a href="javascript:;" id="bgString" class="disabledLink">Copy BG String</a>
+      </div>
+      <div id="progress"></div>
+      <div id="design"></div>
+    </main>
   </body>
 </html>

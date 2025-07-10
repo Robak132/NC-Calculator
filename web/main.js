@@ -1,8 +1,7 @@
-$(() => { FissionOpt().then((FissionOpt) => {
+$(() => { FissionOpt().then(() => {
   const run = $('#run'), pause = $('#pause'), stop = $('#stop');
-  let opt = null;
-  let timeout = null;
-
+  let opt = null, timeout = null;
+  
   const updateDisables = () => {
     $('#settings input').prop('disabled', opt !== null);
     $('#settings a')[opt === null ? 'removeClass' : 'addClass']('disabledLink');
@@ -48,62 +47,9 @@ $(() => { FissionOpt().then((FissionOpt) => {
       fuelBaseHeat.val(heat);
     });
   }
-
-  const schedule = () => {
-    timeout = window.setTimeout(step, 0);
-  };
   
-  // Order of entries matters
-  const heatSinks = [
-    {name: "Wt", title:"Water", rate:60, activeRate:250},
-    {name: "Rs", title:"Redstone", rate:90, activeRate:270},
-    {name: "Qz", title:"Quartz", rate:90, activeRate:0},
-    {name: "Au", title:"Gold", rate:120, activeRate:0},
-    {name: "Gs", title:"Glowstone", rate:130, activeRate:0},
-    {name: "Lp", title:"Lapis", rate:120, activeRate:0},
-    {name: "Dm", title:"Diamond", rate:150, activeRate:0},
-    {name: "He", title:"Liquid Helium", rate:140, activeRate:420},
-    {name: "Ed", title:"Enderium", rate:120, activeRate:360},
-    {name: "Cy", title:"Cryotheum", rate:160, activeRate:480},
-    {name: "Fe", title:"Iron", rate:80, activeRate:0},
-    {name: "Em", title:"Emerald", rate:160, activeRate:0},
-    {name: "Cu", title:"Copper", rate:80, activeRate:0},
-    {name: "Sn", title:"Tin", rate:120, activeRate:0},
-    {name: "Mg", title:"Magnesium", rate:110, activeRate:0},
-    {name: "Al", title:"Aluminium", rate:175, activeRate:0},
-    {name: "As", title:"Arsenic", rate:135, activeRate:0},
-    {name: "B", title:"Boron", rate:160, activeRate:0},
-    {name: "ES", title:"EndStone", rate:40, activeRate:0},
-    {name: "Ft", title:"Fluorite", rate:160, activeRate:0},
-    {name: "Pb", title:"Lead", rate:60, activeRate:0},
-    {name: "N", title:"Liquid Nitrogen", rate:185, activeRate:0},
-    {name: "Li", title:"Lithium", rate:130, activeRate:0},
-    {name: "Mn", title:"Manganese", rate:150, activeRate:0},
-    {name: "NB", title:"Nether Brick", rate:70, activeRate:0},
-    {name: "Nr", title:"Netherite", rate:150, activeRate:0},
-    {name: "Ob", title:"Obsidian", rate:40, activeRate:0},
-    {name: "Pm", title:"Prismarine", rate:115, activeRate:0},
-    {name: "Pp", title:"Purpur", rate:95, activeRate:0},
-    {name: "Ag", title:"Silver", rate:170, activeRate:0},
-    {name: "Sl", title:"Slime", rate:145, activeRate:0},
-  ];
-  const otherBlocks = [
-    {name: "[]", title:"Reactor Cell"},
-    {name: "##", title:"Moderator"},
-    {name: "..", title:"Air"},
-  ];
-  const nCoolerTypes = heatSinks.length;
-  const air = nCoolerTypes*2 + otherBlocks.length - 1;
-  const tileNames = [ ...heatSinks.map((e)=>e.name), ...otherBlocks.map((e)=>e.name) ];
-  const tileTitles = [ ...heatSinks.map((e)=>e.title), ...otherBlocks.map((e)=>e.title) ];
-  
-  // class names for css
-  const tileClasses = tileNames.slice();
-  tileClasses[nCoolerTypes] = 'cell';
-  tileClasses[nCoolerTypes + 1] = 'mod';
-  tileClasses[nCoolerTypes + 2] = 'air';
-
-  const rates = [], limits = [];
+  const rates = []
+  let limits = []
   $('#rate input').each(function() { rates.push($(this)); });
   $('#activeRate input').each(function() { rates.push($(this)); });
   $('#limit input').each(function() { limits.push($(this)); });
@@ -112,23 +58,33 @@ $(() => { FissionOpt().then((FissionOpt) => {
     $('#activeLimit input').each(function() { limits.push($(this)); });
     limits.push(...tail);
   }
-  const loadRatePreset = (preset) => {
-    if (opt !== null)
-      return;
-    $.each(rates, (i, x) => { x.val(preset[i]); });
-  }
 
-  // Overwrite names
-  const tileSaveNames = tileTitles.slice();
-  tileSaveNames[7] = 'Helium';
-  tileSaveNames[21] = 'Nitrogen';
-  tileSaveNames[nCoolerTypes] = 'FuelCell';
-  tileSaveNames[nCoolerTypes + 1] = 'Graphite';
+  $("#temperatureList").on("change", function() {$("#temperature").val(this.value)});
+  $("#modFEMult").val(16.666666667);
+  $("#modHeatMult").val(33.33333333);
+  });
+
+  const schedule = () => {
+    timeout = window.setTimeout(step, 0);
+  };
 
   const settings = new FissionOpt.FissionSettings();
   const design = $('#design');
   const save = $('#save');
+  const bgString = $('#bgString');
+  const nCoolerTypes = 31, air = nCoolerTypes * 2 + 2;
+  const tileNames = ['Wt', 'Rs', 'He', 'Ed', 'Cr', 'Nt', 'Qz', 'Au', 'Gs', 'Lp', 'Dm', 'Fe', 'Em', 'Cu', 'Sn', 'Mg', 'Mn', 'En', 'As', 'Pm', 'Ob', 'Al', 'Vi', 'Bo', 'Ag', 'Fl', 'Nr', 'Pb', 'Pr', 'Sm', 'Li', '[]', '##', '..'];
+  const tileTitles = ['Water', 'Redstone', 'Liquid Helium', 'Enderium', 'Cryotheum', 'Liquid Nitrogen', 'Quartz', 'Gold', 'Glowstone', 'Lapis', 'Diamond',
+    'Iron', 'Emerald', 'Copper', 'Tin', 'Magnesium', 'Manganese', 'End Stone', 'Arsenic', 'Prismarine', 'Obsidian', 'Aluminum',
+    'Villiaumite', 'Boron', 'Silver', 'Fluorite', 'Nether Brick', 'Lead', 'Purpur', 'Slime', 'Lithium', 'Fuel Cell', 'Moderator', 'Air'];
   $('#blockType>:not(:first)').each((i, x) => { $(x).attr('title', tileTitles[i]); });
+  const tileClasses = tileNames.slice();
+  tileClasses[31] = 'cell';
+  tileClasses[32] = 'mod';
+  tileClasses[33] = 'air';
+  const tileSaveNames = tileTitles.slice(0, 32);
+  tileSaveNames[31] = 'fission_reactor_solid_fuel_cell';
+  tileSaveNames[32] = 'graphite_block';
 
   const displayTile = (tile) => {
     let active = false;
@@ -137,11 +93,7 @@ $(() => { FissionOpt().then((FissionOpt) => {
       if (tile < nCoolerTypes)
         active = true;
     }
-    const result = $(
-      '<span>'
-      + (tileNames[tile].length === 1 ? `${tileNames[tile]}&nbsp;` : tileNames[tile])
-      + '</span>'
-    ).addClass(tileClasses[tile]);
+    const result = $('<span>' + tileNames[tile] + '</span>').addClass(tileClasses[tile]);
     if (active) {
       result.attr('title', 'Active ' + tileTitles[tile]);
       result.css('outline', '2px dashed black')
@@ -155,10 +107,16 @@ $(() => { FissionOpt().then((FissionOpt) => {
     if (tile >= nCoolerTypes) {
       tile -= nCoolerTypes;
       if (tile < nCoolerTypes) {
-        return "Active " + tileSaveNames[tile];
+        return "nuclearcraft:active_" + tileSaveNames[tile].toLowerCase().replaceAll(" ", "_") + "_heat_sink";
+      } else {
+        if (tile === tileTitles.length - 1) {
+          return "minecraft:air";
+        } else {
+          return "nuclearcraft:" + tileSaveNames[tile];
+        }
       }
     }
-    return tileSaveNames[tile];
+    return "nuclearcraft:" + tileSaveNames[tile].toLowerCase().replaceAll(" ", "_") + "_heat_sink";
   };
 
   const displaySample = (sample) => {
@@ -171,14 +129,14 @@ $(() => { FissionOpt().then((FissionOpt) => {
       row.append(Math.round(value * 100) / 100);
       block.append(row);
     };
-    appendInfo('Max Power', sample.getPower(), 'RF/t');
+    appendInfo('Max Power', sample.getPower(), 'FE/t');
     appendInfo('Heat', sample.getHeat(), 'H/t');
     appendInfo('Cooling', sample.getCooling(), 'H/t');
     appendInfo('Net Heat', sample.getNetHeat(), 'H/t');
     appendInfo('Duty Cycle', sample.getDutyCycle() * 100, '%');
     appendInfo('Fuel Use Rate', sample.getAvgBreed(), '&times;');
     appendInfo('Efficiency', sample.getEfficiency() * 100, '%');
-    appendInfo('Avg Power', sample.getAvgPower(), 'RF/t');
+    appendInfo('Avg Power', sample.getAvgPower(), 'FE/t');
     design.append(block);
 
     const shapes = [], strides = [], data = sample.getData();
@@ -187,32 +145,20 @@ $(() => { FissionOpt().then((FissionOpt) => {
       strides.push(sample.getStride(i));
     }
     let resourceMap = {};
-    const saved = {
-      UsedFuel: {name: '', FuelTime: 0.0, BasePower: settings.fuelBasePower, BaseHeat: settings.fuelBaseHeat},
-      SaveVersion: {Major: 1, Minor: 2, Build: 24, Revision: 0, MajorRevision: 0, MinorRevision: 0},
-      InteriorDimensions: {X: shapes[2], Y: shapes[0], Z: shapes[1]},
-      CompressedReactor: {}
-    };
-    resourceMap[-1] = (shapes[0] * shapes[1] + shapes[1] * shapes[2] + shapes[2] * shapes[0]) * 2;
-    for (let x = 0; x < shapes[0]; ++x) {
+    resourceMap[-1] = (shapes[0] * shapes[1] + shapes[1] * shapes[2] + shapes[2] * shapes[0]) * 2 + (shapes[0] + shapes[1] + shapes[2]) * 4 + 8;
+    for (let y = 0; y < shapes[0]; ++y) {
       block = $('<div></div>');
-      block.append('<div>Layer ' + (x + 1) + '</div>');
-      for (let y = 0; y < shapes[1]; ++y) {
+      block.append('<div>Layer ' + (y + 1) + '</div>');
+      for (let z = 0; z < shapes[1]; ++z) {
         const row = $('<div></div>').addClass('row');
-        for (let z = 0; z < shapes[2]; ++z) {
-          if (z)
+        for (let x = 0; x < shapes[2]; ++x) {
+          if (x)
             row.append(' ');
-          const tile = data[x * strides[0] + y * strides[1] + z * strides[2]];
+          const tile = data[y * strides[0] + z * strides[1] + x * strides[2]];
           if (!resourceMap.hasOwnProperty(tile))
             resourceMap[tile] = 1;
           else
             ++resourceMap[tile];
-          const savedTile = saveTile(tile);
-          if (savedTile !== undefined) {
-            if (!saved.CompressedReactor.hasOwnProperty(savedTile))
-              saved.CompressedReactor[savedTile] = [];
-            saved.CompressedReactor[savedTile].push({X: z + 1, Y: x + 1, Z: y + 1});
-          }
           row.append(displayTile(tile));
         }
         block.append(row);
@@ -222,12 +168,60 @@ $(() => { FissionOpt().then((FissionOpt) => {
 
     save.removeClass('disabledLink');
     save.off('click').click(() => {
-      const elem = document.createElement('a');
-      const url = window.URL.createObjectURL(new Blob([JSON.stringify(saved)], {type: 'text/json'}));
-      elem.setAttribute('href', url);
-      elem.setAttribute('download', 'reactor.json');
-      elem.click();
-      window.URL.revokeObjectURL(url);
+      import("https://cdn.jsdelivr.net/npm/nbtify@2.2.0/+esm").then(async (NBT) => {
+        let internalMap = {}
+        let palette = {};
+        let data = sample.getData();
+        internalIndex = 0;
+        blockData = new Int8Array(shapes[0] * shapes[1] * shapes[2]);
+        for (let y = 0; y < shapes[0]; ++y) {
+          for (let z = 0; z < shapes[1]; ++z) {
+            for (let x = 0; x < shapes[2]; ++x) {
+              const index = y * strides[0] + z * strides[1] + x * strides[2];
+              const savedTile = saveTile(data[index]);
+              if (!internalMap.hasOwnProperty(savedTile)) {
+                palette[savedTile] = new NBT.Int32(internalIndex);
+                blockData[index] = internalIndex;
+                internalMap[savedTile] = internalIndex++;
+              } else {
+                blockData[index] = internalMap[savedTile];
+              }
+            }
+          }
+        }
+        res = await NBT.write({Width: new NBT.Int16(shapes[2]), Height: new NBT.Int16(shapes[0]), Length: new NBT.Int16(shapes[1]), Version: new NBT.Int32(2),
+                    DataVersion: new NBT.Int32(3465), PaletteMax: new NBT.Int32(Object.keys(palette).length), Palette: palette, BlockData: blockData});
+        const elem = document.createElement('a');
+        const url = window.URL.createObjectURL(new Blob([res]));
+        elem.setAttribute('href', url);
+        elem.setAttribute('download', 'reactor.schem');
+        elem.click();
+        window.URL.revokeObjectURL(url);
+      });
+    });
+
+    bgString.removeClass('disabledLink');
+    bgString.off('click').click(() => {
+      internalMap = {};
+      let data = sample.getData();
+      internalIndex = 0;
+      stateList = [];
+      for (let y = 0; y < shapes[1]; ++y) {
+        for (let z = 0; z < shapes[0]; ++z) {
+          for (let x = 0; x < shapes[2]; ++x) {
+            const savedTile = `{Name:\\"${saveTile(data[z * shapes[2] * shapes[1] + y * shapes[2] + x])}\\"}`;
+            if (!internalMap.hasOwnProperty(savedTile)) {
+              stateList.push(internalIndex);
+              internalMap[savedTile] = internalIndex++;
+            } else {
+              stateList.push(internalMap[savedTile]);
+            }
+          }
+        }
+      }
+      string = `{"statePosArrayList": "{blockstatemap:[${Object.keys(internalMap)}],startpos:{X:0,Y:0,Z:0},` +
+      `endpos:{X:${shapes[2] - 1},Y:${shapes[0] - 1},Z:${shapes[1] - 1}},statelist:[I;${stateList}]}"}`;
+      navigator.clipboard.writeText(string);
     });
 
     block = $('<div></div>');
@@ -249,7 +243,6 @@ $(() => { FissionOpt().then((FissionOpt) => {
 
   const progress = $('#progress');
   let lossElement, lossPlot;
-
   function step() {
     schedule();
     opt.stepInteractive();
@@ -287,18 +280,31 @@ $(() => { FissionOpt().then((FissionOpt) => {
           throw Error(name + " must be a positive number");
         return result;
       };
+      const parseValidFloat = (name, x) => {
+        const result = parseFloat(x);
+        if (isNaN(parseFloat(x)))
+          throw Error(name + " must be a number");
+        return result;
+      };
       try {
         settings.sizeX = parseSize($('#sizeX').val());
         settings.sizeY = parseSize($('#sizeY').val());
         settings.sizeZ = parseSize($('#sizeZ').val());
         settings.fuelBasePower = parsePositiveFloat('Fuel Base Power', fuelBasePower.val());
         settings.fuelBaseHeat = parsePositiveFloat('Fuel Base Heat', fuelBaseHeat.val());
-        settings.ensureActiveCoolerAccessible = $('#ensureActiveCoolerAccessible').is(':checked');
         settings.ensureHeatNeutral = $('#ensureHeatNeutral').is(':checked');
         settings.goal = parseInt($('input[name=goal]:checked').val());
         settings.symX = $('#symX').is(':checked');
         settings.symY = $('#symY').is(':checked');
         settings.symZ = $('#symZ').is(':checked');
+        settings.temperature = parseValidFloat('Temperature', $('#temperature').val());
+        settings.altCalc = true;
+        settings.genMult = parsePositiveFloat('Generation Multiplier', $('#genMult').val());
+        settings.heatMult = parsePositiveFloat('Heat Multiplier', $('#heatMult').val());
+        settings.modFEMult = parsePositiveFloat('Moderator FE Multiplier', $('#modFEMult').val());
+        settings.modHeatMult = parsePositiveFloat('Moderator Heat Multiplier', $('#modHeatMult').val());
+        settings.FEGenMult = parsePositiveFloat('FE Generation Multiplier', $('#FEGenMult').val());
+        settings.activeHeatsinkPrime = $('#activeHeatsinkPrime').is(':checked');
         $.each(rates, (i, x) => { settings.setRate(i, parsePositiveFloat('Cooling Rate', x.val())); });
         $.each(limits, (i, x) => {
           x = parseInt(x.val());
@@ -327,14 +333,18 @@ $(() => { FissionOpt().then((FissionOpt) => {
     schedule();
     updateDisables();
   });
+
   pause.click(() => {
-    if (timeout === null) return;
+    if (timeout === null)
+      return;
     window.clearTimeout(timeout);
     timeout = null;
     updateDisables();
   });
+
   stop.click(() => {
-    if (opt === null) return;
+    if (opt === null)
+      return;
     if (timeout !== null) {
       window.clearTimeout(timeout);
       timeout = null;
@@ -343,6 +353,4 @@ $(() => { FissionOpt().then((FissionOpt) => {
     opt = null;
     updateDisables();
   });
-
-  $(document).ready(()=> loadRatePreset([...heatSinks.map((e) => e.rate), ...heatSinks.map((e) => e.activeRate)]))
-})});
+})

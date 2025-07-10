@@ -42,7 +42,7 @@ namespace Fission {
     void restart();
     bool feasible(const Evaluation &x) const;
     double rawFitness(const Evaluation &x) const;
-    double currentFitness(Sample &x) const;
+    double currentFitness(const Sample &x) const;
     int getNSym(int x, int y, int z) const;
     void setTileWithSym(Sample &sample, int x, int y, int z, int tile) const;
     void mutateAndEvaluate(Sample &sample, int x, int y, int z);

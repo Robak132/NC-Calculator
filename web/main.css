@@ -1,15 +1,5 @@
 body {
   line-height: 150%;
-  display: flex;
-  flex-direction: column;
-}
-
-.divStep{
-  margin: 2em 0;
-}
-
-footer{
-  padding-top: 1em;
 }
 
 table {
@@ -17,6 +7,11 @@ table {
   background-color: black;
   white-space: nowrap;
 }
+
+td:first-child, th:first-child {
+  left: 0;
+  position: sticky;
+} 
 
 td, th {
   text-align: center;
@@ -35,7 +30,7 @@ input {
 }
 
 #settings>*, main>* {
-  margin-top: 0.3em;
+  margin-top: 0.5em;
 }
 
 .disabledLink {
@@ -51,7 +46,7 @@ input {
   width: 8.5ch;
 }
 
-.fuelPresets {
+.tables {
   overflow-x: auto;
 }
 
@@ -67,38 +62,46 @@ input {
 
 .Wt {color: dodgerblue;}
 .Rs {color: red;}
+.He {color: lightcoral;}
+.Ed {color: teal;}
+.Cr {color: deepskyBlue;}
 .Qz {color: lightgray;}
 .Au {color: gold;}
 .Gs {color: #dc0;}
 .Lp {color: blue;}
 .Dm {color: powderblue;}
-.He {color: lightcoral;}
-.Ed {color: teal;}
-.Cy {color: deepskyBlue;}
 .Fe {color: wheat;}
 .Em {color: green;}
 .Cu {color: brown;}
 .Sn {color: lightsteelblue;}
 .Mg {color: pink;}
-.Al {color: rgb(137, 184, 255);}
-.As {color: rgb(160, 151, 101);}
-.B {color: rgb(139, 255, 62);}
-.ES {color: rgb(199, 196, 39);}
-.Ft {color: rgb(145, 137, 255);}
-.Pb {color: rgb(31, 31, 31);}
-.N {color: rgb(0, 90, 224);}
-.Li {color: rgb(214, 214, 214);}
-.Mn {color: rgb(69, 0, 109);}
-.NB {color: #570404;}
-.Nt {color: rgb(36, 0, 0);}
-.Ob {color: #2a0035;}
-.Pm {color: rgb(0, 146, 146);}
-.Pp {color: rgb(214, 153, 255);}
-.Ag {color: rgb(240, 240, 240);}
-.Sl {color: rgb(62, 255, 120);}
+.Mn {color: #aaafcc;}
+.En {color: #ecf8b4;}
+.As {color: #8f9284;}
+.Pm {color: mediumaquamarine;}
+.Ob {color: indigo;}
+.Al {color: #d4f4e9;}
+.Vi {color: #9a7161;}
+.Bo {color: silver;}
+.Ag {color: mistyrose;}
+.Fl {color: #8dae99;}
+.Nr {color: maroon;}
+.Pb {color: darkslategray;}
+.Pr {color: mediumorchid;}
+.Sm {color: lightgreen;}
+.Li {color: lavender;}
+.Nt {color: #42a649;}
+.air {color: white;}
 .cell {color: gray;}
 .mod {color: black;}
-.air {color: white;}
+
+#temperature {
+  width: 4.5ch;
+}
+
+.configs input[type="text"] {
+  width: 12ch;
+}
 
 #design>* {
   float: left;

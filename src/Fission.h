@@ -5,29 +5,14 @@
 namespace Fission {
   using Coords = std::vector<std::tuple<int, int, int>>;
 
-  constexpr int neutronReach(4);
-  constexpr double modPower(1.0), modHeat(2.0);
-
   enum {
     // Cooler
-    Water, Redstone, Quartz,
-    Gold, Glowstone, Lapis,
-    Diamond, Helium, Enderium,
-    Cryotheum, Iron, Emerald,
-    Copper, Tin, Magnesium,
-    // New in NC Neoteric:
-    Aluminium, Arsenic, Boron,
-    Endstone, Fluorite, Lead,
-    Nitrogen, Lithium, Manganese,
-    Netherbrick, Netherite, Obsidian,
-    Prismarine, Purpur, Silver,
-    Slime,
-    // Active variants
-    Active,
+    Water, Redstone, Helium, Enderium, Cryotheum, Nitrogen, Quartz, Gold,
+    Glowstone, Lapis, Diamond, Iron, Emerald, Copper, Tin, Magnesium,
+    Manganese, EndStone, Arsenic, Prismarine, Obsidian, Aluminium, Villiaumite,
+    Boron, Silver, Fluorite, NetherBrick, Lead, Purpur, Slime, Lithium, Active,
     // Other
-    Cell = Active * 2, Moderator,
-    // Air must be last
-    Air
+    Cell = Active * 2, Moderator, Air
   };
 
   enum {
@@ -41,42 +26,40 @@ namespace Fission {
     double fuelBasePower, fuelBaseHeat;
     int limit[Air];
     double coolingRates[Cell];
-    bool ensureActiveCoolerAccessible;
     bool ensureHeatNeutral;
     int goal;
     bool symX, symY, symZ;
+    double temperature;
+    bool activeHeatsinkPrime;
+    double genMult, heatMult, modFEMult, modHeatMult, FEGenMult;
   };
 
   struct Evaluation {
     // Raw
     Coords invalidTiles;
-    double powerMult, heatMult, cooling;
-    int breed;
+    double cooling;
+    int breed, fuelCellMultiplier, moderatorCellMultiplier, cellsHeatMult, cellsEnergyMult;
     // Computed
-    double heat, netHeat, dutyCycle, avgMult, power, avgPower, avgBreed, efficiency;
-    double fitness;
+    double heat, netHeat, dutyCycle, power, avgPower, avgBreed, efficiency;
+
     void compute(const Settings &settings);
+    double heatMultiplier(double heatPerTick, double coolingPerTick, double heatMult, bool altCalc);
   };
 
   class Evaluator {
     const Settings &settings;
-    xt::xtensor<int, 3> mults, rules;
+    xt::xtensor<int, 3> rules;
     xt::xtensor<bool, 3> isActive, isModeratorInLine, visited;
     const xt::xtensor<int, 3> *state;
-    int compatibleTile;
-
+    
     int getTileSafe(int x, int y, int z) const;
-    int getMultSafe(int x, int y, int z) const;
-    bool countMult(int x, int y, int z, int dx, int dy, int dz);
-    int countMult(int x, int y, int z);
+    bool hasCellInLine(int x, int y, int z, int dx, int dy, int dz);
+    int countAdjFuelCells(int x, int y, int z);
     bool isActiveSafe(int tile, int x, int y, int z) const;
-    bool isBetweenSafe(int tile, int x, int y, int z) const;
     int countActiveNeighbors(int tile, int x, int y, int z) const;
     bool isTileSafe(int tile, int x, int y, int z) const;
     int countNeighbors(int tile, int x, int y, int z) const;
     int countCasingNeighbors(int x, int y, int z) const;
-    bool checkAccessibility(int compatibleTile, int x, int y, int z);
-    bool checkAccessibility(int x, int y, int z);
   public:
     Evaluator(const Settings &settings);
     void run(const xt::xtensor<int, 3> &state, Evaluation &result);
