@@ -60,8 +60,8 @@ $(() => { FissionOpt().then((FissionOpt) => {
   }
 
   $("#temperatureList").on("change", function() {$("#temperature").val(this.value)});
-  $("#modFEMult").val(16.666666667)
-  $("#modHeatMult").val(33.33333333)
+  $("#modFEMult").val(16.67)
+  $("#modHeatMult").val(33.34)
 
   const schedule = () => {
     timeout = window.setTimeout(step, 0);
