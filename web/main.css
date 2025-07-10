@@ -95,10 +95,6 @@ input {
 .cell {color: gray;}
 .mod {color: black;}
 
-#temperature {
-  width: 4.5ch;
-}
-
 .configs input[type="text"] {
   width: 12ch;
 }

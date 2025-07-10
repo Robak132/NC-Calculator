@@ -4,9 +4,8 @@
 
 namespace Fission {
   void Evaluation::compute(const Settings &settings) {
-    cooling += 1.0 / std::max(0.01, settings.temperature);
-    double moderatorsFE = moderatorCellMultiplier * settings.modFEMult / 100.0;
-    double moderatorsHeat = moderatorCellMultiplier * settings.modHeatMult / 100.0;
+    const double moderatorsFE = moderatorCellMultiplier * settings.modFEMult / 100.0;
+    const double moderatorsHeat = moderatorCellMultiplier * settings.modHeatMult / 100.0;
     heat = settings.fuelBaseHeat * (cellsHeatMult + moderatorsHeat);
     power = settings.fuelBasePower * (cellsEnergyMult + moderatorsFE);
     power = trunc(power * heatMultiplier(heat, cooling, settings.heatMult) * settings.FEGenMult / 10.0 * settings.genMult);
@@ -18,7 +17,7 @@ namespace Fission {
     efficiency = breed ? power / (settings.fuelBasePower * mult) : 1.0;
   }
 
-  double Evaluation::heatMultiplier(double heatPerTick, double coolingPerTick, double heatMult) {
+  double Evaluation::heatMultiplier(const double heatPerTick, const double coolingPerTick, const double heatMult) {
     if (heatPerTick == 0.0) {
       return 0.0;
     }

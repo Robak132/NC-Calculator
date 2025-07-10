@@ -143,45 +143,8 @@
           </tr>
         </tbody>
       </table></div>
-      <div>
-        <b>Step 4</b>: If you want the generator to factor in the biome you are building this in, select the biome from the dropdown menu below.
-        Otherwise, leave the dropdown and textbox as is. Alternatively, you can manually enter the biome temperature in the textbox below.
-      </div>
-      <div>Biome Temperature: <input type="text" id="temperature" value="2"></div>
-      <select id="temperatureList">
-        <option value="2">Select Biome:</option>
-        <optgroup label="Overworld">
-          <option value="2">Badlands</option><option value="0.95">Bamboo Jungle</option><option value="0.8">Beach</option>
-          <option value="0.6">Birch Forest</option><option value="0.5">Cherry Grove</option><option value="0.5">Cold Ocean</option>
-          <option value="0.7">Dark Forest</option><option value="0.5">Deep Cold Ocean</option><option value="0.8">Deep Dark</option>
-          <option value="0.5">Deep Frozen Ocean</option><option value="0.5">Deep Lukewarm Ocean</option><option value="0.5">Deep Ocean</option>
-          <option value="2">Desert</option><option value="0.8">Dripstone Caves</option><option value="2">Eroded Badlands</option>
-          <option value="0.7">Flower Forest</option><option value="0.7">Forest</option><option value="0">Frozen Ocean</option>
-          <option value="-0.7">Frozen Peaks</option><option value="0">Frozen River</option><option value="-0.2">Grove</option>
-          <option value="0">Ice Spikes</option><option value="-0.7">Jagged Peaks</option><option value="0.95">Jungle</option>
-          <option value="0.5">Lukewarm Ocean</option><option value="0.5">Lush Caves</option><option value="0.8">Mangrove Swamp</option>
-          <option value="0.5">Meadow</option><option value="0.9">Mushroom Fields</option><option value="0.5">Ocean</option>
-          <option value="0.6">Old Growth Birch Forest</option><option value="0.3">Old Growth Pine Taiga</option>
-          <option value="0.25">Old Growth Spruce Taiga</option><option value="0.8">Plains</option><option value="0.5">River</option>
-          <option value="2">Savanna Plateau</option><option value="2">Savanna</option><option value="0.05">Snowy Beach</option>
-          <option value="0">Snowy Plains</option><option value="-0.3">Snowy Slopes</option><option value="-0.5">Snowy Taiga</option>
-          <option value="0.95">Sparse Jungle</option><option value="1">Stony Peaks</option><option value="0.2">Stony Shore</option>
-          <option value="0.8">Sunflower Plains</option><option value="0.8">Swamp</option><option value="0.25">Taiga</option>
-          <option value="0.5">Warm Ocean</option><option value="0.2">Windswept Forest</option><option value="0.2">Windswept Gravelly Hills</option>
-          <option value="0.2">Windswept Hills</option><option value="2">Windswept Savanna</option><option value="2">Wooded Badlands</option>
-        </optgroup>
-        <optgroup label="The Void">
-          <option value="0.5">The Void</option>
-        </optgroup>
-        <optgroup label="The Nether">
-          <option value="2">Any Nether Biome</option>
-        </optgroup>
-        <optgroup label="The End">
-          <option value="0.5">Any End Biome</option>
-        </optgroup>
-      </select>
       <div class="configs">
-        <b>Step 5</b>: Adjust these settings to match whatever modpack you are using, or leave them as default. All
+        <b>Step 4</b>: Adjust these settings to match whatever modpack you are using, or leave them as default. All
         config values can be found in either <i>common.toml</i> or <i>fission.toml</i> in the NuclearCraft config.<br>
         <div>Generation Multiplier: <input type="text" id="genMult" value="1"></div>
         <div>Heat Multiplier: <input type="text" id="heatMult" value="3"></div>
@@ -191,7 +154,7 @@
         <label><input type="checkbox" id="activeHeatsinkPrime" checked>Active Heatsink Prime</label>
       </div>
       <div>
-        <b>Step 6</b>: Adjust the options below and click &ldquo;Run&rdquo; to start the optimization.<br>
+        <b>Step 5</b>: Adjust the options below and click &ldquo;Run&rdquo; to start the optimization.<br>
         <label><input type="checkbox" id="ensureHeatNeutral" checked>Only generate heat neutral reactor.</label><br>
         <label><input type="radio" name="goal" value="0" checked>Optimize for power.</label><br>
         <label><input type="radio" name="goal" value="1">Optimize for breeding (maximize fuel consumption rate).</label><br>

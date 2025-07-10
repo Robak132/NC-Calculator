@@ -29,7 +29,6 @@ namespace Fission {
     bool ensureHeatNeutral;
     int goal;
     bool symX, symY, symZ;
-    double temperature;
     bool activeHeatsinkPrime;
     double genMult, heatMult, modFEMult, modHeatMult, FEGenMult;
   };

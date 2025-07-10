@@ -59,10 +59,6 @@ $(() => { FissionOpt().then((FissionOpt) => {
     limits.push(...tail);
   }
 
-  $("#temperatureList").on("change", function() {$("#temperature").val(this.value)});
-  $("#modFEMult").val(16.67)
-  $("#modHeatMult").val(33.34)
-
   const schedule = () => {
     timeout = window.setTimeout(step, 0);
   }
@@ -305,7 +301,6 @@ $(() => { FissionOpt().then((FissionOpt) => {
         settings.symX = $('#symX').is(':checked');
         settings.symY = $('#symY').is(':checked');
         settings.symZ = $('#symZ').is(':checked');
-        settings.temperature = parseValidFloat('Temperature', $('#temperature').val());
         settings.genMult = parsePositiveFloat('Generation Multiplier', $('#genMult').val());
         settings.heatMult = parsePositiveFloat('Heat Multiplier', $('#heatMult').val());
         settings.modFEMult = parsePositiveFloat('Moderator FE Multiplier', $('#modFEMult').val());
