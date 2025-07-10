@@ -9,7 +9,7 @@ namespace Fission {
     double moderatorsHeat = moderatorCellMultiplier * settings.modHeatMult / 100.0;
     heat = settings.fuelBaseHeat * (cellsHeatMult + moderatorsHeat);
     power = settings.fuelBasePower * (cellsEnergyMult + moderatorsFE);
-    power = trunc(power * heatMultiplier(heat, cooling, settings.heatMult, settings.altCalc) * settings.FEGenMult / 10.0 * settings.genMult);
+    power = trunc(power * heatMultiplier(heat, cooling, settings.heatMult, true) * settings.FEGenMult / 10.0 * settings.genMult);
     netHeat = heat - cooling;
     dutyCycle = std::min(1.0, cooling / heat);
     avgPower = power * dutyCycle;
@@ -26,9 +26,8 @@ namespace Fission {
     double heatMultiplier = std::log10(heatPerTick / c) / (1 + std::exp(heatPerTick / c * heatMult)) + 1;
     if (altCalc) {
       return round(heatMultiplier * 100) / 100;
-    } else {
-      return heatMultiplier;
     }
+    return heatMultiplier;
   }
 
   Evaluator::Evaluator(const Settings &settings)
@@ -45,7 +44,7 @@ namespace Fission {
   }
 
   bool Evaluator::hasCellInLine(int x, int y, int z, int dx, int dy, int dz) {
-    for (int n{}; n <= (settings.altCalc ? 4 : 1); ++n) {
+    for (int n{}; n <= (true ? 4 : 1); ++n) {
       x += dx; y += dy; z += dz;
       int tile(getTileSafe(x, y, z));
       if (tile == Cell) {
@@ -73,7 +72,7 @@ namespace Fission {
          + hasCellInLine(x, y, z, 0, 0, +1);
   }
 
-  bool Evaluator::isActiveSafe(int tile, int x, int y, int z) const {
+  int Evaluator::isActiveSafe(int tile, int x, int y, int z) const {
     if (!state->in_bounds(x, y, z))
       return false;
     return (*state)(x, y, z) == tile && isActive(x, y, z) && (tile < Active || tile == Moderator || settings.activeHeatsinkPrime);
@@ -134,8 +133,8 @@ namespace Fission {
             int adjFuelCells(countAdjFuelCells(x, y, z));
             rules(x, y, z) = -1;
             ++result.breed;
-            if (settings.altCalc) {
-              result.cellsHeatMult += ((adjFuelCells + 1) * (adjFuelCells + 2)) / 2;
+            if (true) {
+              result.cellsHeatMult += (adjFuelCells + 1) * (adjFuelCells + 2) / 2;
               result.cellsEnergyMult += adjFuelCells + 1;
             } else {
               result.fuelCellMultiplier += adjFuelCells * 3;

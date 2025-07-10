@@ -82,7 +82,7 @@ namespace Fission {
     // Assemble batch
     std::uniform_int_distribution<size_t> dist(0, pool.size() - 1);
     for (int i{}; i < nMiniBatch; ++i) {
-      auto &sample(pool[dist(opt.rng)]);
+      const auto &sample(pool[dist(opt.rng)]);
       xt::view(batchInput, i, xt::all()) = sample.first;
       batchTarget(i) = sample.second;
     }

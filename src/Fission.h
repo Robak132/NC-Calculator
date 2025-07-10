@@ -43,7 +43,8 @@ namespace Fission {
     double heat, netHeat, dutyCycle, power, avgPower, avgBreed, efficiency;
 
     void compute(const Settings &settings);
-    double heatMultiplier(double heatPerTick, double coolingPerTick, double heatMult, bool altCalc);
+
+    static double heatMultiplier(double heatPerTick, double coolingPerTick, double heatMult, bool altCalc);
   };
 
   class Evaluator {
@@ -55,7 +56,7 @@ namespace Fission {
     int getTileSafe(int x, int y, int z) const;
     bool hasCellInLine(int x, int y, int z, int dx, int dy, int dz);
     int countAdjFuelCells(int x, int y, int z);
-    bool isActiveSafe(int tile, int x, int y, int z) const;
+    int isActiveSafe(int tile, int x, int y, int z) const;
     int countActiveNeighbors(int tile, int x, int y, int z) const;
     bool isTileSafe(int tile, int x, int y, int z) const;
     int countNeighbors(int tile, int x, int y, int z) const;

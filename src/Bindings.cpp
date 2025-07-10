@@ -75,7 +75,6 @@ EMSCRIPTEN_BINDINGS(FissionOpt) {
     .property("symY", &Fission::Settings::symY)
     .property("symZ", &Fission::Settings::symZ)
     .property("temperature", &Fission::Settings::temperature)
-    .property("altCalc", &Fission::Settings::altCalc)
     .property("genMult", &Fission::Settings::genMult)
     .property("heatMult", &Fission::Settings::heatMult)
     .property("modFEMult", &Fission::Settings::modFEMult)
