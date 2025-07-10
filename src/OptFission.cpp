@@ -10,7 +10,7 @@ namespace Fission {
     std::copy(settings.limit, settings.limit + Air, parent.limit);
     parent.state = xt::broadcast<int>(Air,
       {settings.sizeX, settings.sizeY, settings.sizeZ});
-    for (auto &[x, y, z] : allowedCoords) {
+    for (auto const &[x, y, z] : allowedCoords) {
       int nSym(getNSym(x, y, z));
       allowedTiles.clear();
       for (int tile{}; tile < Air; ++tile)
@@ -224,9 +224,10 @@ namespace Fission {
   }
 
   void Opt::stepInteractive() {
-    int dim(settings.sizeX * settings.sizeY * settings.sizeZ);
-    int n(std::min(interactiveMin, (interactiveScale + dim - 1) / dim));
-    for (int i{}; i < (nStage == StageTrain ? interactiveNet : nStage == StageInfer ? interactiveNet * nMiniBatch / 4 : n); ++i) {
+    const int dim(settings.sizeX * settings.sizeY * settings.sizeZ);
+    const int n(std::min(interactiveMin, (interactiveScale + dim - 1) / dim));
+    const int temp = nStage == StageTrain ? interactiveNet : nStage == StageInfer ? interactiveNet * nMiniBatch / 4 : n;
+    for (int i{}; i < temp; ++i) {
       step();
       ++redrawNagle;
     }

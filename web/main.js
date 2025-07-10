@@ -1,8 +1,14 @@
-$(() => { FissionOpt().then(() => {
+$(() => { FissionOpt().then((FissionOpt) => {
   const run = $('#run'), pause = $('#pause'), stop = $('#stop');
-  /** @type {FissionOpt} */
-  let opt = null
-  let timeout = null;
+  let opt = null, timeout = null;
+
+  const updateDisables = () => {
+    $('#settings input').prop('disabled', opt !== null);
+    $('#settings a')[opt === null ? 'removeClass' : 'addClass']('disabledLink');
+    run[timeout === null ? 'removeClass' : 'addClass']('disabledLink');
+    pause[timeout !== null ? 'removeClass' : 'addClass']('disabledLink');
+    stop[opt !== null ? 'removeClass' : 'addClass']('disabledLink');
+  };
 
   const fuelBasePower = $('#fuelBasePower');
   const fuelBaseHeat = $('#fuelBaseHeat');
@@ -220,7 +226,7 @@ $(() => { FissionOpt().then(() => {
           }
         }
       }
-      string = `{"statePosArrayList": "{blockstatemap:[${Object.keys(internalMap)}],startpos:{X:0,Y:0,Z:0},` +
+      let string = `{"statePosArrayList": "{blockstatemap:[${Object.keys(internalMap)}],startpos:{X:0,Y:0,Z:0},` +
         `endpos:{X:${shapes[2] - 1},Y:${shapes[0] - 1},Z:${shapes[1] - 1}},statelist:[I;${stateList}]}"}`;
       navigator.clipboard.writeText(string);
     });
@@ -244,6 +250,7 @@ $(() => { FissionOpt().then(() => {
 
   const progress = $('#progress');
   let lossElement, lossPlot;
+
   function step() {
     schedule();
     opt.stepInteractive();
@@ -331,15 +338,15 @@ $(() => { FissionOpt().then(() => {
       opt = new FissionOpt.FissionOpt(settings, useNet);
     }
     schedule();
+    updateDisables();
   });
-
   pause.click(() => {
     if (timeout === null)
       return;
     window.clearTimeout(timeout);
     timeout = null;
+    updateDisables();
   });
-
   stop.click(() => {
     if (opt === null)
       return;
@@ -349,5 +356,6 @@ $(() => { FissionOpt().then(() => {
     }
     opt.delete();
     opt = null;
+    updateDisables();
   })
 })});

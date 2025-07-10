@@ -122,12 +122,12 @@ input {
 
 .info>:nth-child(1) {
   position: absolute;
-  left: 0px;
+  left: 0;
 }
 
 .info>:nth-child(2) {
   position: absolute;
-  right: 0px;
+  right: 0;
 }
 
 .row {
