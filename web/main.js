@@ -61,7 +61,6 @@ $(() => { FissionOpt().then(() => {
     timeout = window.setTimeout(step, 0);
   }
 
-  /** @type {FissionSettings} */
   const settings = new FissionOpt.FissionSettings();
   const design = $('#design');
   const save = $('#save');
