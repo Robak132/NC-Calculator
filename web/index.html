@@ -28,7 +28,7 @@
       <div>
         <b>Step 2</b>: Click on the fuel you want to use in the table below. Alternatively, you can manually enter the fuel data in the textboxes below.
         <div>Fuel Base Power: <input type="text" id="fuelBasePower"> RF/t</div>
-        <div>Fuel Base Heat: <input text="text" id="fuelBaseHeat"> H/t</div>
+        <div>Fuel Base Heat: <input type="text" id="fuelBaseHeat"> H/t</div>
         <div class="fuelPresets"><table>
           <tr>
             <td>Thorium (Th)</td>
@@ -184,10 +184,10 @@
         <b>Step 5</b>: Adjust these settings to match whatever modpack you are using, or leave them as default. All
         config values can be found in either <i>common.toml</i> or <i>fission.toml</i> in the NuclearCraft config.<br>
         <div>Generation Multiplier: <input type="text" id="genMult" value="1"></div>
-        <div>Heat Multiplier: <input type="text" id="heatMult" value="1"></div>
-        <div>Moderator FE Multiplier: <input type="text" id="modFEMult" value="16.666666667"></div>
-        <div>Moderator Heat Multiplier: <input type="text" id="modHeatMult" value="33.33333333"></div>
-        <div>FE Generation Multiplier: <input type="text" id="FEGenMult" value="10"></div>
+        <div>Heat Multiplier: <input type="text" id="heatMult" value="3"></div>
+        <div>Moderator FE Multiplier: <input type="text" id="modFEMult" value="16.67"></div>
+        <div>Moderator Heat Multiplier: <input type="text" id="modHeatMult" value="33.34"></div>
+        <div>FE Generation Multiplier: <input type="text" id="FEGenMult" value="5"></div>
         <label><input type="checkbox" id="activeHeatsinkPrime" checked>Active Heatsink Prime</label>
       </div>
       <div>
@@ -214,11 +214,11 @@
     </section>
     <main>
       <div>
-        <a href="javascript:;" id="run">Run</a>
-        <a href="javascript:;" id="pause" class="disabledLink">Pause</a>
-        <a href="javascript:;" id="stop" class="disabledLink">Stop</a>
-        <a href="javascript:;" id="save" class="disabledLink">Save Schematic</a>
-        <a href="javascript:;" id="bgString" class="disabledLink">Copy BG String</a>
+        <a href="javascript:" id="run">Run</a>
+        <a href="javascript:" id="pause" class="disabledLink">Pause</a>
+        <a href="javascript:" id="stop" class="disabledLink">Stop</a>
+        <a href="javascript:" id="save" class="disabledLink">Save Schematic</a>
+        <a href="javascript:" id="bgString" class="disabledLink">Copy BG String</a>
       </div>
       <div id="progress"></div>
       <div id="design"></div>
