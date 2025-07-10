@@ -1,164 +1,3 @@
-/**
- * @class FissionSettings
- * @property {number} sizeX
- * @property {number} sizeY
- * @property {number} sizeZ
- * @property {number} fuelBasePower
- * @property {number} fuelBaseHeat
- * @property {boolean} ensureHeatNeutral
- * @property {number} goal
- * @property {boolean} symX
- * @property {boolean} symY
- * @property {boolean} symZ
- * @property {number} temperature
- * @property {number} genMult
- * @property {number} heatMult
- * @property {number} modFEMult
- * @property {number} modHeatMult
- * @property {number} FEGenMult
- * @property {number} activeHeatsinkPrime
- */
-class FissionSettings {
-  /**
-   * @method setLimit
-   * @param {number} index
-   * @param {number} limit
-   * @returns {void}
-   */
-  setLimit(index, limit) {}
-
-  /**
-   * @method setRate
-   * @param {number} index
-   * @param {number} rate
-   * @returns {void}
-   */
-  setRate(index, rate) {}
-}
-
-/**
- * @class FissionSample
- */
-class FissionSample {
-  /**
-   * @method getData
-   * @returns {Float64Array}
-   */
-  getData() {}
-
-  /**
-   * @method getShape
-   * @param {number} i
-   * @returns {number}
-   */
-  getShape(i) {}
-
-  /**
-   * @method getStride
-   * @param {number} i
-   * @returns {number}
-   */
-  getStride(i) {}
-
-  /**
-   * @method getPower
-   * @returns {number}
-   */
-  getPower() {}
-
-  /**
-   * @method getHeat
-   * @returns {number}
-   */
-  getHeat() {}
-
-  /**
-   * @method getCooling
-   * @returns {number}
-   */
-  getCooling() {}
-
-  /**
-   * @method getNetHeat
-   * @returns {number}
-   */
-  getNetHeat() {}
-
-  /**
-   * @method getDutyCycle
-   * @returns {number}
-   */
-  getDutyCycle() {}
-
-  /**
-   * @method getAvgPower
-   * @returns {number}
-   */
-  getAvgPower() {}
-
-  /**
-   * @method getAvgBreed
-   * @returns {number}
-   */
-  getAvgBreed() {}
-
-  /**
-   * @method getEfficiency
-   * @returns {number}
-   */
-  getEfficiency() {}
-}
-
-/**
- * @class FissionOpt
- * @constructor
- * @param {FissionSettings} settings
- * @param {boolean} interactive
- */
-class FissionOpt {
-  /**
-   * @method stepInteractive
-   * @returns {void}
-   */
-  stepInteractive() {}
-  /**
-   * @method needsRedrawBest
-   * @returns {boolean}
-   */
-  needsRedrawBest() {}
-  /**
-   * @method needsReplotLoss
-   * @returns {boolean}
-   */
-  needsReplotLoss() {}
-  /**
-   * @method getLossHistory
-   * @returns {Float64Array}
-   */
-  getLossHistory() {}
-  /**
-   * @method getBest
-   * @returns {FissionSample}
-   */
-  getBest() {}
-  /**
-   * @method getNEpisode
-   * @returns {number}
-   */
-  getNEpisode() {}
-  /**
-   * @method getNStage
-   * @returns {number}
-   */
-  getNStage() {}
-  /**
-   * @method getNIteration
-   * @returns {number}
-   */
-  getNIteration() {}
-}
-
-
 $(() => { FissionOpt().then(() => {
   const run = $('#run'), pause = $('#pause'), stop = $('#stop');
   /** @type {FissionOpt} */
@@ -328,8 +167,8 @@ $(() => { FissionOpt().then(() => {
         let internalMap = {}
         let palette = {};
         let data = sample.getData();
-        internalIndex = 0;
-        blockData = new Int8Array(shapes[0] * shapes[1] * shapes[2]);
+        let internalIndex = 0;
+        let blockData = new Int8Array(shapes[0] * shapes[1] * shapes[2]);
         for (let y = 0; y < shapes[0]; ++y) {
           for (let z = 0; z < shapes[1]; ++z) {
             for (let x = 0; x < shapes[2]; ++x) {
@@ -366,10 +205,10 @@ $(() => { FissionOpt().then(() => {
 
     bgString.removeClass('disabledLink');
     bgString.off('click').click(() => {
-      internalMap = {};
+      let internalMap = {};
       let data = sample.getData();
-      internalIndex = 0;
-      stateList = [];
+      let internalIndex = 0;
+      let stateList = [];
       for (let y = 0; y < shapes[1]; ++y) {
         for (let z = 0; z < shapes[0]; ++z) {
           for (let x = 0; x < shapes[2]; ++x) {
@@ -494,7 +333,6 @@ $(() => { FissionOpt().then(() => {
       opt = new FissionOpt.FissionOpt(settings, useNet);
     }
     schedule();
-    updateDisables();
   });
 
   pause.click(() => {
@@ -502,7 +340,6 @@ $(() => { FissionOpt().then(() => {
       return;
     window.clearTimeout(timeout);
     timeout = null;
-    updateDisables();
   });
 
   stop.click(() => {
@@ -514,6 +351,5 @@ $(() => { FissionOpt().then(() => {
     }
     opt.delete();
     opt = null;
-    updateDisables();
   })
 })});
