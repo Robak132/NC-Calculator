@@ -112,7 +112,6 @@ $(() => { FissionOpt().then(() => {
     return "nuclearcraft:" + tileSaveNames[tile].toLowerCase().replaceAll(" ", "_") + "_heat_sink";
   };
 
-  /** @param {FissionSample} sample */
   const displaySample = (sample) => {
     design.empty();
     let block = $('<div></div>');
