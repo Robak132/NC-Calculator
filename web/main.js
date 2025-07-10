@@ -1,14 +1,169 @@
+/**
+ * @class FissionSettings
+ * @property {number} sizeX
+ * @property {number} sizeY
+ * @property {number} sizeZ
+ * @property {number} fuelBasePower
+ * @property {number} fuelBaseHeat
+ * @property {boolean} ensureHeatNeutral
+ * @property {number} goal
+ * @property {boolean} symX
+ * @property {boolean} symY
+ * @property {boolean} symZ
+ * @property {number} temperature
+ * @property {number} genMult
+ * @property {number} heatMult
+ * @property {number} modFEMult
+ * @property {number} modHeatMult
+ * @property {number} FEGenMult
+ * @property {number} activeHeatsinkPrime
+ */
+class FissionSettings {
+  /**
+   * @method setLimit
+   * @param {number} index
+   * @param {number} limit
+   * @returns {void}
+   */
+  setLimit(index, limit) {}
+
+  /**
+   * @method setRate
+   * @param {number} index
+   * @param {number} rate
+   * @returns {void}
+   */
+  setRate(index, rate) {}
+}
+
+/**
+ * @class FissionSample
+ */
+class FissionSample {
+  /**
+   * @method getData
+   * @returns {Float64Array}
+   */
+  getData() {}
+
+  /**
+   * @method getShape
+   * @param {number} i
+   * @returns {number}
+   */
+  getShape(i) {}
+
+  /**
+   * @method getStride
+   * @param {number} i
+   * @returns {number}
+   */
+  getStride(i) {}
+
+  /**
+   * @method getPower
+   * @returns {number}
+   */
+  getPower() {}
+
+  /**
+   * @method getHeat
+   * @returns {number}
+   */
+  getHeat() {}
+
+  /**
+   * @method getCooling
+   * @returns {number}
+   */
+  getCooling() {}
+
+  /**
+   * @method getNetHeat
+   * @returns {number}
+   */
+  getNetHeat() {}
+
+  /**
+   * @method getDutyCycle
+   * @returns {number}
+   */
+  getDutyCycle() {}
+
+  /**
+   * @method getAvgPower
+   * @returns {number}
+   */
+  getAvgPower() {}
+
+  /**
+   * @method getAvgBreed
+   * @returns {number}
+   */
+  getAvgBreed() {}
+
+  /**
+   * @method getEfficiency
+   * @returns {number}
+   */
+  getEfficiency() {}
+}
+
+/**
+ * @class FissionOpt
+ * @constructor
+ * @param {FissionSettings} settings
+ * @param {boolean} interactive
+ */
+class FissionOpt {
+  /**
+   * @method stepInteractive
+   * @returns {void}
+   */
+  stepInteractive() {}
+  /**
+   * @method needsRedrawBest
+   * @returns {boolean}
+   */
+  needsRedrawBest() {}
+  /**
+   * @method needsReplotLoss
+   * @returns {boolean}
+   */
+  needsReplotLoss() {}
+  /**
+   * @method getLossHistory
+   * @returns {Float64Array}
+   */
+  getLossHistory() {}
+  /**
+   * @method getBest
+   * @returns {FissionSample}
+   */
+  getBest() {}
+  /**
+   * @method getNEpisode
+   * @returns {number}
+   */
+  getNEpisode() {}
+  /**
+   * @method getNStage
+   * @returns {number}
+   */
+  getNStage() {}
+  /**
+   * @method getNIteration
+   * @returns {number}
+   */
+  getNIteration() {}
+}
+
+
 $(() => { FissionOpt().then(() => {
   const run = $('#run'), pause = $('#pause'), stop = $('#stop');
-  let opt = null, timeout = null;
-  
-  const updateDisables = () => {
-    $('#settings input').prop('disabled', opt !== null);
-    $('#settings a')[opt === null ? 'removeClass' : 'addClass']('disabledLink');
-    run[timeout === null ? 'removeClass' : 'addClass']('disabledLink');
-    pause[timeout !== null ? 'removeClass' : 'addClass']('disabledLink');
-    stop[opt !== null ? 'removeClass' : 'addClass']('disabledLink');
-  };
+  /** @type {FissionOpt} */
+  let opt = null
+  let timeout = null;
 
   const fuelBasePower = $('#fuelBasePower');
   const fuelBaseHeat = $('#fuelBaseHeat');
@@ -60,14 +215,14 @@ $(() => { FissionOpt().then(() => {
   }
 
   $("#temperatureList").on("change", function() {$("#temperature").val(this.value)});
-  $("#modFEMult").val(16.666666667);
-  $("#modHeatMult").val(33.33333333);
-  });
+  $("#modFEMult").val(16.666666667)
+  $("#modHeatMult").val(33.33333333)
 
   const schedule = () => {
     timeout = window.setTimeout(step, 0);
-  };
+  }
 
+  /** @type {FissionSettings} */
   const settings = new FissionOpt.FissionSettings();
   const design = $('#design');
   const save = $('#save');
@@ -119,6 +274,7 @@ $(() => { FissionOpt().then(() => {
     return "nuclearcraft:" + tileSaveNames[tile].toLowerCase().replaceAll(" ", "_") + "_heat_sink";
   };
 
+  /** @param {FissionSample} sample */
   const displaySample = (sample) => {
     design.empty();
     let block = $('<div></div>');
@@ -189,8 +345,16 @@ $(() => { FissionOpt().then(() => {
             }
           }
         }
-        res = await NBT.write({Width: new NBT.Int16(shapes[2]), Height: new NBT.Int16(shapes[0]), Length: new NBT.Int16(shapes[1]), Version: new NBT.Int32(2),
-                    DataVersion: new NBT.Int32(3465), PaletteMax: new NBT.Int32(Object.keys(palette).length), Palette: palette, BlockData: blockData});
+        let res = await NBT.write({
+          Width: new NBT.Int16(shapes[2]),
+          Height: new NBT.Int16(shapes[0]),
+          Length: new NBT.Int16(shapes[1]),
+          Version: new NBT.Int32(2),
+          DataVersion: new NBT.Int32(3465),
+          PaletteMax: new NBT.Int32(Object.keys(palette).length),
+          Palette: palette,
+          BlockData: blockData
+        });
         const elem = document.createElement('a');
         const url = window.URL.createObjectURL(new Blob([res]));
         elem.setAttribute('href', url);
@@ -220,7 +384,7 @@ $(() => { FissionOpt().then(() => {
         }
       }
       string = `{"statePosArrayList": "{blockstatemap:[${Object.keys(internalMap)}],startpos:{X:0,Y:0,Z:0},` +
-      `endpos:{X:${shapes[2] - 1},Y:${shapes[0] - 1},Z:${shapes[1] - 1}},statelist:[I;${stateList}]}"}`;
+        `endpos:{X:${shapes[2] - 1},Y:${shapes[0] - 1},Z:${shapes[1] - 1}},statelist:[I;${stateList}]}"}`;
       navigator.clipboard.writeText(string);
     });
 
@@ -239,7 +403,7 @@ $(() => { FissionOpt().then(() => {
       block.append(row.append(' &times; ' + resource[1]));
     }
     design.append(block);
-  };
+  }
 
   const progress = $('#progress');
   let lossElement, lossPlot;
@@ -298,7 +462,6 @@ $(() => { FissionOpt().then(() => {
         settings.symY = $('#symY').is(':checked');
         settings.symZ = $('#symZ').is(':checked');
         settings.temperature = parseValidFloat('Temperature', $('#temperature').val());
-        settings.altCalc = true;
         settings.genMult = parsePositiveFloat('Generation Multiplier', $('#genMult').val());
         settings.heatMult = parsePositiveFloat('Heat Multiplier', $('#heatMult').val());
         settings.modFEMult = parsePositiveFloat('Moderator FE Multiplier', $('#modFEMult').val());
@@ -352,5 +515,5 @@ $(() => { FissionOpt().then(() => {
     opt.delete();
     opt = null;
     updateDisables();
-  });
-})
+  })
+})});

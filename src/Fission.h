@@ -44,7 +44,7 @@ namespace Fission {
 
     void compute(const Settings &settings);
 
-    static double heatMultiplier(double heatPerTick, double coolingPerTick, double heatMult, bool altCalc);
+    static double heatMultiplier(double heatPerTick, double coolingPerTick, double heatMult);
   };
 
   class Evaluator {
@@ -63,7 +63,7 @@ namespace Fission {
     int countCasingNeighbors(int x, int y, int z) const;
   public:
     Evaluator(const Settings &settings);
-    void run(const xt::xtensor<int, 3> &state, Evaluation &result);
+    void run(const xt::xtensor<int, 3> &currentState, Evaluation &result);
   };
 }
 

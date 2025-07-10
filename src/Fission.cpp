@@ -9,7 +9,7 @@ namespace Fission {
     double moderatorsHeat = moderatorCellMultiplier * settings.modHeatMult / 100.0;
     heat = settings.fuelBaseHeat * (cellsHeatMult + moderatorsHeat);
     power = settings.fuelBasePower * (cellsEnergyMult + moderatorsFE);
-    power = trunc(power * heatMultiplier(heat, cooling, settings.heatMult, true) * settings.FEGenMult / 10.0 * settings.genMult);
+    power = trunc(power * heatMultiplier(heat, cooling, settings.heatMult) * settings.FEGenMult / 10.0 * settings.genMult);
     netHeat = heat - cooling;
     dutyCycle = std::min(1.0, cooling / heat);
     avgPower = power * dutyCycle;
@@ -18,16 +18,13 @@ namespace Fission {
     efficiency = breed ? power / (settings.fuelBasePower * mult) : 1.0;
   }
 
-  double Evaluation::heatMultiplier(double heatPerTick, double coolingPerTick, double heatMult, bool altCalc) {
+  double Evaluation::heatMultiplier(double heatPerTick, double coolingPerTick, double heatMult) {
     if (heatPerTick == 0.0) {
       return 0.0;
     }
     double c = std::max(1.0, coolingPerTick);
     double heatMultiplier = std::log10(heatPerTick / c) / (1 + std::exp(heatPerTick / c * heatMult)) + 1;
-    if (altCalc) {
-      return round(heatMultiplier * 100) / 100;
-    }
-    return heatMultiplier;
+    return round(heatMultiplier * 100) / 100;
   }
 
   Evaluator::Evaluator(const Settings &settings)
@@ -44,7 +41,7 @@ namespace Fission {
   }
 
   bool Evaluator::hasCellInLine(int x, int y, int z, int dx, int dy, int dz) {
-    for (int n{}; n <= (true ? 4 : 1); ++n) {
+    for (int n{}; n <= 4; ++n) {
       x += dx; y += dy; z += dz;
       int tile(getTileSafe(x, y, z));
       if (tile == Cell) {
@@ -52,13 +49,12 @@ namespace Fission {
           x -= dx; y -= dy; z -= dz;
           isModeratorInLine(x, y, z) = true;
         }
-        if (getTileSafe(x, y, z) == Moderator) { // Moderator check probably not necessary but might as well put it in
+        if (getTileSafe(x, y, z) == Moderator) {
           isActive(x, y, z) = true;
         }
         return true;
-      } else if (tile != Moderator) {
-        return false;
       }
+      if (tile != Moderator) return false;
     }
     return false;
   }
@@ -114,7 +110,7 @@ namespace Fission {
       + !state->in_bounds(x, y, z + 1);
   }
 
-  void Evaluator::run(const xt::xtensor<int, 3> &state, Evaluation &result) {
+  void Evaluator::run(const xt::xtensor<int, 3> &currentState, Evaluation &result) {
     result.invalidTiles.clear();
     result.cellsHeatMult = 0;
     result.cellsEnergyMult = 0;
@@ -124,7 +120,7 @@ namespace Fission {
     result.breed = 0; // Number of Cells
     isActive.fill(false);
     isModeratorInLine.fill(false);
-    this->state = &state;
+    this->state = &currentState;
     for (int x{}; x < settings.sizeX; ++x) {
       for (int y{}; y < settings.sizeY; ++y) {
         for (int z{}; z < settings.sizeZ; ++z) {
@@ -133,12 +129,8 @@ namespace Fission {
             int adjFuelCells(countAdjFuelCells(x, y, z));
             rules(x, y, z) = -1;
             ++result.breed;
-            if (true) {
-              result.cellsHeatMult += (adjFuelCells + 1) * (adjFuelCells + 2) / 2;
-              result.cellsEnergyMult += adjFuelCells + 1;
-            } else {
-              result.fuelCellMultiplier += adjFuelCells * 3;
-            }
+            result.cellsHeatMult += (adjFuelCells + 1) * (adjFuelCells + 2) / 2;
+            result.cellsEnergyMult += adjFuelCells + 1;
             result.moderatorCellMultiplier += countActiveNeighbors(Moderator, x, y, z) * (adjFuelCells + 1);
           } else {
             if (tile < Active) {
@@ -179,6 +171,8 @@ namespace Fission {
               break;
             case Manganese:
               isActive(x, y, z) = countNeighbors(Cell, x, y, z) >= 2;
+            default:
+              break;
           }
         }
       }
@@ -216,14 +210,15 @@ namespace Fission {
                 isActiveSafe(Lapis, x, y, z + 1);
               break;
             case Magnesium:
-              isActive(x, y, z) = countActiveNeighbors(Moderator, x, y, z)
-                && countCasingNeighbors(x, y, z);
+              isActive(x, y, z) = countActiveNeighbors(Moderator, x, y, z) && countCasingNeighbors(x, y, z);
               break;
             case EndStone:
               isActive(x, y, z) = countActiveNeighbors(Enderium, x, y, z);
               break;
             case Arsenic:
               isActive(x, y, z) = countActiveNeighbors(Moderator, x, y, z) >= 3;
+            default:
+              break;
           }
         }
       }
@@ -270,6 +265,8 @@ namespace Fission {
             case Silver:
               isActive(x, y, z) = countActiveNeighbors(Glowstone, x, y, z) >= 2
               && countActiveNeighbors(Tin, x, y, z);
+            default:
+              break;
           }
         }
       }
@@ -283,11 +280,12 @@ namespace Fission {
               isActive(x, y, z) = countActiveNeighbors(Gold, x, y, z);
               break;
             case Fluorite:
-              isActive(x, y, z) = countActiveNeighbors(Prismarine, x, y, z)
-              && countActiveNeighbors(Gold, x, y, z);
+              isActive(x, y, z) = countActiveNeighbors(Prismarine, x, y, z) && countActiveNeighbors(Gold, x, y, z);
               break;
             case NetherBrick:
               isActive(x, y, z) = countActiveNeighbors(Obsidian, x, y, z);
+            default:
+              break;
           }
         }
       }
@@ -301,8 +299,9 @@ namespace Fission {
               isActive(x, y, z) = countActiveNeighbors(Iron, x, y, z);
               break;
             case Purpur:
-              isActive(x, y, z) = countActiveNeighbors(Iron, x, y, z)
-              && countCasingNeighbors(x, y, z);
+              isActive(x, y, z) = countActiveNeighbors(Iron, x, y, z) && countCasingNeighbors(x, y, z);
+            default:
+              break;
           }
         }
       }
@@ -330,6 +329,8 @@ namespace Fission {
               case Nitrogen:
                 isActive(x, y, z) = countActiveNeighbors(Purpur, x, y, z)
                 && countActiveNeighbors(Copper, x, y, z);
+              default:
+                break;
             }
             if (isActive(x, y, z))
               result.cooling += settings.coolingRates[tile];
