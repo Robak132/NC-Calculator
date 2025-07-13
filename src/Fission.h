@@ -1,6 +1,6 @@
 #ifndef _FISSION_H_
 #define _FISSION_H_
-#include <xtensor/containers/xtensor.hpp>
+#include <xtensor/xtensor.hpp>
 
 namespace Fission {
   using Coords = std::vector<std::tuple<int, int, int>>;
@@ -50,7 +50,7 @@ namespace Fission {
     const Settings &settings;
     xt::xtensor<int, 3> rules;
     xt::xtensor<bool, 3> isActive, isModeratorInLine, visited;
-    const xt::xtensor<int, 3> *state = nullptr;
+    const xt::xtensor<int, 3> *state;
     
     int getTileSafe(int x, int y, int z) const;
     bool hasCellInLine(int x, int y, int z, int dx, int dy, int dz);
