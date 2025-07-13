@@ -125,13 +125,15 @@ $(() => { FissionOpt().then((FissionOpt) => {
       block.append(row);
     };
     appendInfo('Max Power', sample.getPower(), 'FE/t');
+    appendInfo('Avg Power', sample.getAvgPower(), 'FE/t');
+    appendInfo('Max Power (GT)', sample.getPower() / 8192 / 4, 'A (EV)');
+    appendInfo('Avg Power (GT)', sample.getAvgPower() / 8192 / 4, 'A (EV)');
     appendInfo('Heat', sample.getHeat(), 'H/t');
     appendInfo('Cooling', sample.getCooling(), 'H/t');
     appendInfo('Net Heat', sample.getNetHeat(), 'H/t');
     appendInfo('Duty Cycle', sample.getDutyCycle() * 100, '%');
     appendInfo('Fuel Use Rate', sample.getAvgBreed(), '&times;');
     appendInfo('Efficiency', sample.getEfficiency() * 100, '%');
-    appendInfo('Avg Power', sample.getAvgPower(), 'FE/t');
     design.append(block);
 
     const shapes = [], strides = [], data = sample.getData();
