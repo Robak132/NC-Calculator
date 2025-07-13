@@ -1,15 +1,77 @@
+import COMPONENTS from "../data/components.json" with { type: "json" };
+import "https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"
+import "https://code.jquery.com/jquery-3.5.0.slim.min.js"
+import "./FissionOpt.js";
+import {Int16, Int32, write} from "https://cdn.jsdelivr.net/npm/nbtify@2.2.0/+esm";
+
+function createBlockTypeTable() {
+  const table = $('<table></table>');
+  const thead = $('<thead><tr id="blockType"><th>Block Type</th></tr></thead>');
+  const rate = $('<tr id="rate"><th>Cooling Rate (H/t)</th></tr>');
+  const maxAllowed = $('<tr id="limit"><th>Max Allowed</th></tr>');
+  const activeRate = $('<tr id="activeRate"><th>Active Cooling Rate (H/t)</th></tr>');
+  const maxActiveAllowed = $('<tr id="activeLimit"><th>Max Active Allowed</th></tr>');
+  COMPONENTS.forEach(bt => {
+    thead.find('tr').append(`<td title="${bt.title}" class="${bt.name}">${bt.name}</td>`);
+    if (bt.cooling_rate == null) {
+      rate.append(`<td>—</td>`)
+    } else {
+      rate.append(`<td><input type="text" value="${bt.cooling_rate}"></td>`)
+    }
+    maxAllowed.append(`<td><input type="text"></td>`)
+    if (bt.active_cooling_rate == null) {
+      activeRate.append(`<td>—</td>`)
+      maxActiveAllowed.append(`<td>—</td>`)
+    } else {
+      activeRate.append(`<td><input type="text" value="${bt.active_cooling_rate}"></td>`)
+      maxActiveAllowed.append(`<td><input type="text" value="0"></td>`)
+    }
+  });
+  table.append(thead);
+  table.append(rate);
+  table.append(maxAllowed)
+  table.append(activeRate)
+  table.append(maxActiveAllowed)
+  $('.tables').empty().append(table);
+}
+
+function displayTile(tile) {
+  let active = false;
+  if (tile >= COMPONENTS.length) {
+    active = tile < 2 * COMPONENTS.length;
+    tile -= COMPONENTS.length;
+  }
+  const result = $('<span>' + COMPONENTS[tile].name + '</span>').addClass(COMPONENTS[tile].className);
+  if (active) {
+    result.attr('title', `Active ${COMPONENTS[tile].title}`);
+    result.css('outline', '2px dashed black')
+  } else {
+    result.attr('title', COMPONENTS[tile].title);
+  }
+  return result;
+}
+
+function saveTile(tile) {
+  if (tile >= COMPONENTS) {
+    tile -= COMPONENTS;
+    if (tile < COMPONENTS) {
+      return "nuclearcraft:active_" + tileSaveNames[tile].toLowerCase().replaceAll(" ", "_") + "_heat_sink";
+    } else {
+      if (tile === tileTitles.length - 1) {
+        return "minecraft:air";
+      } else {
+        return "nuclearcraft:" + tileSaveNames[tile];
+      }
+    }
+  }
+  return "nuclearcraft:" + tileSaveNames[tile].toLowerCase().replaceAll(" ", "_") + "_heat_sink";
+}
+
 $(() => { FissionOpt().then((FissionOpt) => {
+  createBlockTypeTable()
   const run = $('#run'), pause = $('#pause'), stop = $('#stop');
-  let opt = null, timeout = null;
-
-  const updateDisables = () => {
-    $('#settings input').prop('disabled', opt !== null);
-    $('#settings a')[opt === null ? 'removeClass' : 'addClass']('disabledLink');
-    run[timeout === null ? 'removeClass' : 'addClass']('disabledLink');
-    pause[timeout !== null ? 'removeClass' : 'addClass']('disabledLink');
-    stop[opt !== null ? 'removeClass' : 'addClass']('disabledLink');
-  };
-
+  let opt = null
+  let timeout = null;
   const fuelBasePower = $('#fuelBasePower');
   const fuelBaseHeat = $('#fuelBaseHeat');
   const fuelPresets = {
@@ -47,17 +109,21 @@ $(() => { FissionOpt().then((FissionOpt) => {
       fuelBaseHeat.val(heat);
     });
   }
-  
+
+  const updateDisables = () => {
+    $('#settings input').prop('disabled', opt !== null);
+    $('#settings a')[opt === null ? 'removeClass' : 'addClass']('disabledLink');
+    run[timeout === null ? 'removeClass' : 'addClass']('disabledLink');
+    pause[timeout !== null ? 'removeClass' : 'addClass']('disabledLink');
+    stop[opt !== null ? 'removeClass' : 'addClass']('disabledLink');
+  };
+
   const rates = []
   let limits = []
   $('#rate input').each(function() { rates.push($(this)); });
   $('#activeRate input').each(function() { rates.push($(this)); });
   $('#limit input').each(function() { limits.push($(this)); });
-  {
-    const tail = limits.splice(-2);
-    $('#activeLimit input').each(function() { limits.push($(this)); });
-    limits.push(...tail);
-  }
+  $('#activeLimit input').each(function() { limits.push($(this)); });
 
   const schedule = () => {
     timeout = window.setTimeout(step, 0);
@@ -67,52 +133,6 @@ $(() => { FissionOpt().then((FissionOpt) => {
   const design = $('#design');
   const save = $('#save');
   const bgString = $('#bgString');
-  const nCoolerTypes = 31, air = nCoolerTypes * 2 + 2;
-  const tileNames = ['Wt', 'Rs', 'He', 'Ed', 'Cr', 'Nt', 'Qz', 'Au', 'Gs', 'Lp', 'Dm', 'Fe', 'Em', 'Cu', 'Sn', 'Mg', 'Mn', 'En', 'As', 'Pm', 'Ob', 'Al', 'Vi', 'Bo', 'Ag', 'Fl', 'Nr', 'Pb', 'Pr', 'Sm', 'Li', '[]', '##', '..'];
-  const tileTitles = ['Water', 'Redstone', 'Liquid Helium', 'Enderium', 'Cryotheum', 'Liquid Nitrogen', 'Quartz', 'Gold', 'Glowstone', 'Lapis', 'Diamond',
-    'Iron', 'Emerald', 'Copper', 'Tin', 'Magnesium', 'Manganese', 'End Stone', 'Arsenic', 'Prismarine', 'Obsidian', 'Aluminum',
-    'Villiaumite', 'Boron', 'Silver', 'Fluorite', 'Nether Brick', 'Lead', 'Purpur', 'Slime', 'Lithium', 'Fuel Cell', 'Moderator', 'Air'];
-  $('#blockType>:not(:first)').each((i, x) => { $(x).attr('title', tileTitles[i]); });
-  const tileClasses = tileNames.slice();
-  tileClasses[31] = 'cell';
-  tileClasses[32] = 'mod';
-  tileClasses[33] = 'air';
-  const tileSaveNames = tileTitles.slice(0, 32);
-  tileSaveNames[31] = 'fission_reactor_solid_fuel_cell';
-  tileSaveNames[32] = 'graphite_block';
-
-  const displayTile = (tile) => {
-    let active = false;
-    if (tile >= nCoolerTypes) {
-      tile -= nCoolerTypes;
-      if (tile < nCoolerTypes)
-        active = true;
-    }
-    const result = $('<span>' + tileNames[tile] + '</span>').addClass(tileClasses[tile]);
-    if (active) {
-      result.attr('title', 'Active ' + tileTitles[tile]);
-      result.css('outline', '2px dashed black')
-    } else {
-      result.attr('title', tileTitles[tile]);
-    }
-    return result;
-  };
-
-  const saveTile = (tile) => {
-    if (tile >= nCoolerTypes) {
-      tile -= nCoolerTypes;
-      if (tile < nCoolerTypes) {
-        return "nuclearcraft:active_" + tileSaveNames[tile].toLowerCase().replaceAll(" ", "_") + "_heat_sink";
-      } else {
-        if (tile === tileTitles.length - 1) {
-          return "minecraft:air";
-        } else {
-          return "nuclearcraft:" + tileSaveNames[tile];
-        }
-      }
-    }
-    return "nuclearcraft:" + tileSaveNames[tile].toLowerCase().replaceAll(" ", "_") + "_heat_sink";
-  };
 
   const displaySample = (sample) => {
     design.empty();
@@ -162,49 +182,47 @@ $(() => { FissionOpt().then((FissionOpt) => {
     }
 
     save.removeClass('disabledLink');
-    save.off('click').click(() => {
-      import("https://cdn.jsdelivr.net/npm/nbtify@2.2.0/+esm").then(async (NBT) => {
-        let internalMap = {}
-        let palette = {};
-        let data = sample.getData();
-        let internalIndex = 0;
-        let blockData = new Int8Array(shapes[0] * shapes[1] * shapes[2]);
-        for (let y = 0; y < shapes[0]; ++y) {
-          for (let z = 0; z < shapes[1]; ++z) {
-            for (let x = 0; x < shapes[2]; ++x) {
-              const index = y * strides[0] + z * strides[1] + x * strides[2];
-              const savedTile = saveTile(data[index]);
-              if (!internalMap.hasOwnProperty(savedTile)) {
-                palette[savedTile] = new NBT.Int32(internalIndex);
-                blockData[index] = internalIndex;
-                internalMap[savedTile] = internalIndex++;
-              } else {
-                blockData[index] = internalMap[savedTile];
-              }
+    save.off('click').click(async () => {
+      let internalMap = {}
+      let palette = {};
+      let data = sample.getData();
+      let internalIndex = 0;
+      let blockData = new Int8Array(shapes[0] * shapes[1] * shapes[2]);
+      for (let y = 0; y < shapes[0]; ++y) {
+        for (let z = 0; z < shapes[1]; ++z) {
+          for (let x = 0; x < shapes[2]; ++x) {
+            const index = y * strides[0] + z * strides[1] + x * strides[2];
+            const savedTile = saveTile(data[index]);
+            if (!internalMap.hasOwnProperty(savedTile)) {
+              palette[savedTile] = new Int32(internalIndex);
+              blockData[index] = internalIndex;
+              internalMap[savedTile] = internalIndex++;
+            } else {
+              blockData[index] = internalMap[savedTile];
             }
           }
         }
-        let res = await NBT.write({
-          Width: new NBT.Int16(shapes[2]),
-          Height: new NBT.Int16(shapes[0]),
-          Length: new NBT.Int16(shapes[1]),
-          Version: new NBT.Int32(2),
-          DataVersion: new NBT.Int32(3465),
-          PaletteMax: new NBT.Int32(Object.keys(palette).length),
-          Palette: palette,
-          BlockData: blockData
-        });
-        const elem = document.createElement('a');
-        const url = window.URL.createObjectURL(new Blob([res]));
-        elem.setAttribute('href', url);
-        elem.setAttribute('download', 'reactor.schem');
-        elem.click();
-        window.URL.revokeObjectURL(url);
+      }
+      let res = await write({
+        Width: new Int16(shapes[2]),
+        Height: new Int16(shapes[0]),
+        Length: new Int16(shapes[1]),
+        Version: new Int32(2),
+        DataVersion: new Int32(3465),
+        PaletteMax: new Int32(Object.keys(palette).length),
+        Palette: palette,
+        BlockData: blockData
       });
+      const elem = document.createElement('a');
+      const url = window.URL.createObjectURL(new Blob([res]));
+      elem.setAttribute('href', url);
+      elem.setAttribute('download', 'reactor.schem');
+      elem.click();
+      window.URL.revokeObjectURL(url);
     });
 
     bgString.removeClass('disabledLink');
-    bgString.off('click').click(() => {
+    bgString.off('click').click(async () => {
       let internalMap = {};
       let data = sample.getData();
       let internalIndex = 0;
@@ -223,17 +241,16 @@ $(() => { FissionOpt().then((FissionOpt) => {
         }
       }
       let string = `{"statePosArrayList": "{blockstatemap:[${Object.keys(internalMap)}],startpos:{X:0,Y:0,Z:0},` +
-        `endpos:{X:${shapes[2] - 1},Y:${shapes[0] - 1},Z:${shapes[1] - 1}},statelist:[I;${stateList}]}"}`;
-      navigator.clipboard.writeText(string);
+          `endpos:{X:${shapes[2] - 1},Y:${shapes[0] - 1},Z:${shapes[1] - 1}},statelist:[I;${stateList}]}"}`;
+      await navigator.clipboard.writeText(string);
     });
 
     block = $('<div></div>');
     block.append('<div>Total number of blocks used</div>')
     resourceMap = Object.entries(resourceMap);
     resourceMap.sort((x, y) => y[1] - x[1]);
-    for (resource of resourceMap) {
-      if (resource[0] === air)
-        continue;
+    for (let resource of resourceMap) {
+      if (resource[0] === 64) continue;
       const row = $('<div></div>');
       if (resource[0] < 0)
         row.append('Casing');
@@ -257,8 +274,9 @@ $(() => { FissionOpt().then((FissionOpt) => {
       progress.text('Episode ' + opt.getNEpisode() + ', inference iteration ' + opt.getNIteration());
     else
       progress.text('Episode ' + opt.getNEpisode() + ', stage ' + nStage + ', iteration ' + opt.getNIteration());
-    if (opt.needsRedrawBest())
+    if (opt.needsRedrawBest()) {
       displaySample(opt.getBest());
+    }
     if (opt.needsReplotLoss()) {
       const data = opt.getLossHistory();
       while (lossPlot.data.labels.length < data.length)
@@ -282,12 +300,6 @@ $(() => { FissionOpt().then((FissionOpt) => {
         const result = parseFloat(x);
         if (!(result >= 0))
           throw Error(name + " must be a positive number");
-        return result;
-      };
-      const parseValidFloat = (name, x) => {
-        const result = parseFloat(x);
-        if (isNaN(parseFloat(x)))
-          throw Error(name + " must be a number");
         return result;
       };
       try {

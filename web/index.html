@@ -6,8 +6,9 @@
     <link rel="stylesheet" href="main.css"/>
     <script src="https://code.jquery.com/jquery-3.5.0.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+    <script type="text/plain" src="../data/components.json"></script>
     <script src="FissionOpt.js"></script>
-    <script src="main.js"></script>
+    <script type="module" src="main.mjs"></script>
   </head>
   <body>
     <header>
@@ -75,33 +76,6 @@
         Active coolers are disabled by default. You can enable them by removing the zeros. <b><i>NOTE: Irradiators are not supported.</i></b>
       </div>
       <div class="tables"><table>
-        <thead><tr id="blockType"><th>Block Type</th>
-          <th class="Wt">Wt</th><th class="Rs">Rs</th><th class="He">He</th>
-          <th class="Ed">Ed</th><th class="Cr">Cr</th><th class="Nt">Nt</th>
-          <th class="Qz">Qz</th><th class="Au">Au</th><th class="Gs">Gs</th>
-          <th class="Lp">Lp</th><th class="Dm">Dm</th><th class="Fe">Fe</th>
-          <th class="Em">Em</th><th class="Cu">Cu</th><th class="Sn">Sn</th>
-          <th class="Mg">Mg</th><th class="Mn">Mn</th><th class="En">En</th>
-          <th class="As">As</th><th class="Pm">Pm</th><th class="Ob">Ob</th>
-          <th class="Al">Al</th><th class="Vi">Vi</th><th class="Bo">Bo</th>
-          <th class="Ag">Ag</th><th class="Fl">Fl</th><th class="Nr">Nr</th>
-          <th class="Pb">Pb</th><th class="Pr">Pr</th><th class="Sm">Sm</th>
-          <th class="Li">Li</th><th class="cell">[]</th><th class="mod">##</th>
-        </tr></thead>
-        <tbody>
-          <tr id="rate"><th>Cooling Rate (H/t)</th>
-            <td><input type="text" value="60"></td><td><input type="text" value="90"></td><td><input type="text" value="140"></td>
-            <td><input type="text" value="120"></td><td><input type="text" value="160"></td><td><input type="text" value="185"></td>
-            <td><input type="text" value="90"></td><td><input type="text" value="120"></td><td><input type="text" value="130"></td>
-            <td><input type="text" value="120"></td><td><input type="text" value="150"></td><td><input type="text" value="80"></td>
-            <td><input type="text" value="160"></td><td><input type="text" value="80"></td><td><input type="text" value="120"></td>
-            <td><input type="text" value="110"></td><td><input type="text" value="150"></td><td><input type="text" value="40"></td>
-            <td><input type="text" value="135"></td><td><input type="text" value="115"></td><td><input type="text" value="40"></td>
-            <td><input type="text" value="175"></td><td><input type="text" value="180"></td><td><input type="text" value="160"></td>
-            <td><input type="text" value="170"></td><td><input type="text" value="160"></td><td><input type="text" value="70"></td>
-            <td><input type="text" value="60"></td><td><input type="text" value="95"></td><td><input type="text" value="145"></td>
-            <td><input type="text" value="130"></td><td>&mdash;</td><td>&mdash;</td>
-          </tr>
           <tr id="limit"><th>Max Allowed</th>
             <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
             <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>

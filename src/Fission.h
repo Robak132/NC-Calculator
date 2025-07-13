@@ -9,7 +9,7 @@ namespace Fission {
     // Cooler
     Water, Redstone, Helium, Enderium, Cryotheum, Nitrogen, Quartz, Gold,
     Glowstone, Lapis, Diamond, Iron, Emerald, Copper, Tin, Magnesium,
-    Manganese, EndStone, Arsenic, Prismarine, Obsidian, Aluminium, Villiaumite,
+    Manganese, EndStone, Arsenic, Prismarine, Obsidian, Aluminium,
     Boron, Silver, Fluorite, NetherBrick, Lead, Purpur, Slime, Lithium, Active,
     // Other
     Cell = Active * 2, Moderator, Air
@@ -50,7 +50,7 @@ namespace Fission {
     const Settings &settings;
     xt::xtensor<int, 3> rules;
     xt::xtensor<bool, 3> isActive, isModeratorInLine, visited;
-    const xt::xtensor<int, 3> *state;
+    const xt::xtensor<int, 3> *state = nullptr;
     
     int getTileSafe(int x, int y, int z) const;
     bool hasCellInLine(int x, int y, int z, int dx, int dy, int dz);

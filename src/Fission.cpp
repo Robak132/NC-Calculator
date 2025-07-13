@@ -83,13 +83,13 @@ namespace Fission {
       + isActiveSafe(tile, x, y, z + 1);
   }
 
-  bool Evaluator::isTileSafe(int tile, int x, int y, int z) const {
+  bool Evaluator::isTileSafe(const int tile, int x, int y, int z) const {
     if (!state->in_bounds(x, y, z))
       return false;
     return (*state)(x, y, z) == tile;
   }
 
-  int Evaluator::countNeighbors(int tile, int x, int y, int z) const {
+  int Evaluator::countNeighbors(const int tile, int x, int y, int z) const {
     return
       + isTileSafe(tile, x - 1, y, z)
       + isTileSafe(tile, x + 1, y, z)
@@ -182,8 +182,7 @@ namespace Fission {
         for (int z{}; z < settings.sizeZ; ++z) {
           switch (rules(x, y, z)) {
             case Water:
-              isActive(x, y, z) = countNeighbors(Cell, x, y, z)
-                || countActiveNeighbors(Moderator, x, y, z);
+              isActive(x, y, z) = countNeighbors(Cell, x, y, z) || countActiveNeighbors(Moderator, x, y, z);
               break;
             case Quartz:
               isActive(x, y, z) = countActiveNeighbors(Moderator, x, y, z);
@@ -250,12 +249,7 @@ namespace Fission {
                 isActiveSafe(Glowstone, x, y, z + 1);
               break;
             case Aluminium:
-              isActive(x, y, z) = countActiveNeighbors(Quartz, x, y, z)
-              && countActiveNeighbors(Lapis, x, y, z);
-              break;
-            case Villiaumite:
-              isActive(x, y, z) = countActiveNeighbors(EndStone, x, y, z)
-              && countActiveNeighbors(Redstone, x, y, z);
+              isActive(x, y, z) = countActiveNeighbors(Quartz, x, y, z) && countActiveNeighbors(Lapis, x, y, z);
               break;
             case Boron:
               isActive(x, y, z) = countActiveNeighbors(Quartz, x, y, z)
@@ -326,8 +320,7 @@ namespace Fission {
                 isActiveSafe(Lead, x, y, z + 1);
                 break;
               case Nitrogen:
-                isActive(x, y, z) = countActiveNeighbors(Purpur, x, y, z)
-                && countActiveNeighbors(Copper, x, y, z);
+                isActive(x, y, z) = countActiveNeighbors(Purpur, x, y, z) && countActiveNeighbors(Copper, x, y, z);
               default:
                 break;
             }
