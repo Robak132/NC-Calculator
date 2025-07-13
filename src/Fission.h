@@ -1,6 +1,6 @@
 #ifndef _FISSION_H_
 #define _FISSION_H_
-#include <xtensor/containers/xtensor.hpp>
+#include <xtensor/xtensor.hpp>
 
 namespace Fission {
   using Coords = std::vector<std::tuple<int, int, int>>;

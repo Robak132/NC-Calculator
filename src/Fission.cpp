@@ -1,5 +1,5 @@
 #include <cmath>
-#include <xtensor/views/xview.hpp>
+#include <xtensor/xview.hpp>
 #include "Fission.h"
 
 namespace Fission {

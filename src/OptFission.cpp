@@ -1,7 +1,7 @@
 #include "OptFission.h"
 #include <array>
 #include <vector>
-#include <xtensor/views/xview.hpp>
+#include <xtensor/xview.hpp>
 #include "FissionNet.h"
 
 namespace Fission {
