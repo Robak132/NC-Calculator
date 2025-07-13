@@ -126,8 +126,8 @@ $(() => { FissionOpt().then((FissionOpt) => {
     };
     appendInfo('Max Power', sample.getPower(), 'FE/t');
     appendInfo('Avg Power', sample.getAvgPower(), 'FE/t');
-    appendInfo('Max Power (GT)', sample.getPower() / 8192 / 4, 'A (EV)');
-    appendInfo('Avg Power (GT)', sample.getAvgPower() / 8192 / 4, 'A (EV)');
+    appendInfo('Max Power (GT)', sample.getPower() / 8192, 'A (EV)');
+    appendInfo('Avg Power (GT)', sample.getAvgPower() / 8192, 'A (EV)');
     appendInfo('Heat', sample.getHeat(), 'H/t');
     appendInfo('Cooling', sample.getCooling(), 'H/t');
     appendInfo('Net Heat', sample.getNetHeat(), 'H/t');
