@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="main.css"/>
     <script src="https://code.jquery.com/jquery-3.5.0.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
-    <script type="text/plain" src="../data/components.json"></script>
+    <script type="text/plain" src="../data/heatsinks.json"></script>
     <script src="FissionOpt.js"></script>
     <script type="module" src="main.mjs"></script>
   </head>
@@ -75,48 +75,7 @@
         Enter zero to completely disable that block. You can hover over the acronym to see the full name of each block.
         Active coolers are disabled by default. You can enable them by removing the zeros. <b><i>NOTE: Irradiators are not supported.</i></b>
       </div>
-      <div class="tables"><table>
-          <tr id="limit"><th>Max Allowed</th>
-            <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-            <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-            <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-            <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-            <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-            <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-            <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-            <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-            <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-            <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-            <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
-          </tr>
-          <tr id="activeRate"><th>Active Rate (H/t)</th>
-            <td><input type="text" value="250"></td><td><input type="text" value="270"></td><td><input type="text" value="420"></td>
-            <td><input type="text" value="360"></td><td><input type="text" value="480"></td><td><input type="text" value="555"></td>
-            <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
-            <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
-            <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
-            <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
-            <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
-            <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
-            <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
-            <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
-            <td><input type="text" value="0"><td>&mdash;</td><td>&mdash;</td>
-          </tr>
-          <tr id="activeLimit"><th>Max Active Allowed</th>
-            <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
-            <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
-            <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
-            <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
-            <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
-            <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
-            <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
-            <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
-            <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
-            <td><input type="text" value="0"></td><td><input type="text" value="0"></td><td><input type="text" value="0"></td>
-            <td><input type="text" value="0"><td>&mdash;</td><td>&mdash;</td>
-          </tr>
-        </tbody>
-      </table></div>
+      <div class="tables"></div>
       <div class="configs">
         <b>Step 4</b>: Adjust these settings to match whatever modpack you are using, or leave them as default. All
         config values can be found in either <i>common.toml</i> or <i>fission.toml</i> in the NuclearCraft config.<br>

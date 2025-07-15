@@ -1,36 +1,22 @@
 #ifndef _FISSION_H_
 #define _FISSION_H_
 #include <xtensor/xtensor.hpp>
+#include "Component.h"
 
 namespace Fission {
   using Coords = std::vector<std::tuple<int, int, int>>;
 
-  enum {
-    // Cooler
-    Water, Redstone, Helium, Enderium, Cryotheum, Nitrogen, Quartz, Gold,
-    Glowstone, Lapis, Diamond, Iron, Emerald, Copper, Tin, Magnesium,
-    Manganese, EndStone, Arsenic, Prismarine, Obsidian, Aluminium,
-    Boron, Silver, Fluorite, NetherBrick, Lead, Purpur, Slime, Lithium, Active,
-    // Other
-    Cell = Active * 2, Moderator, Air
-  };
-
-  enum {
-    GoalPower,
-    GoalBreeder,
-    GoalEfficiency
-  };
+  enum { GoalPower, GoalBreeder, GoalEfficiency };
 
   struct Settings {
     int sizeX, sizeY, sizeZ;
     double fuelBasePower, fuelBaseHeat;
-    int limit[Air];
-    double coolingRates[Cell];
     bool ensureHeatNeutral;
     int goal;
     bool symX, symY, symZ;
     bool activeHeatsinkPrime;
     double genMult, heatMult, modFEMult, modHeatMult, FEGenMult;
+    std::map<int, Component> components = {{0, Component(0, "Air", "air", -1, 0)}};
   };
 
   struct Evaluation {
@@ -48,22 +34,34 @@ namespace Fission {
 
   class Evaluator {
     const Settings &settings;
-    xt::xtensor<int, 3> rules;
-    xt::xtensor<bool, 3> isActive, isModeratorInLine, visited;
-    const xt::xtensor<int, 3> *state;
-    
-    int getTileSafe(int x, int y, int z) const;
+    xt::xtensor<std::string, 3> rules;
+    xt::xtensor<bool, 3> active, isModeratorInLine, visited;
+    const xt::xtensor<int, 3> *state = new xt::xtensor<int, 3>;
+
+    const Component *getTileSafe(int x, int y, int z) const;
     bool hasCellInLine(int x, int y, int z, int dx, int dy, int dz);
     int countAdjFuelCells(int x, int y, int z);
-    int isActiveSafe(int tile, int x, int y, int z) const;
-    int countActiveNeighbors(int tile, int x, int y, int z) const;
-    bool isTileSafe(int tile, int x, int y, int z) const;
-    int countNeighbors(int tile, int x, int y, int z) const;
+    int isActiveSafe(const std::string &tileName, int x, int y, int z) const;
+    int countActiveNeighbors(const std::string &tileName, int x, int y, int z) const;
+    bool isTileSafe(const std::string &tileName, int x, int y, int z) const;
+    int countNeighbors(const std::string &tileName, int x, int y, int z) const;
     int countCasingNeighbors(int x, int y, int z) const;
+
+    int countPassiveHeatsinks() const;
+
   public:
     Evaluator(const Settings &settings);
+    Component getTileFromState(int i, int y, int z) const;
+    int componentIdFromName(const std::string &name) {
+      for (const auto &[id, component] : settings.components) {
+        if (component.getName() == name) {
+          return id;
+        }
+      }
+      return -1;
+    }
     void run(const xt::xtensor<int, 3> &currentState, Evaluation &result);
   };
-}
+} // namespace Fission
 
 #endif

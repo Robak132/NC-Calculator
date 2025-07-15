@@ -6,7 +6,7 @@
 
 namespace Fission {
   struct Sample {
-    int limit[Air];
+    std::map<int, Component> components;
     xt::xtensor<int, 3> state;
     Evaluation value;
   };

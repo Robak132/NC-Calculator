@@ -7,33 +7,37 @@
 namespace Fission {
   void Opt::restart() {
     std::shuffle(allowedCoords.begin(), allowedCoords.end(), rng);
-    std::copy(settings.limit, settings.limit + Air, parent.limit);
-    parent.state = xt::broadcast<int>(Air,
-      {settings.sizeX, settings.sizeY, settings.sizeZ});
-    for (auto const &[x, y, z] : allowedCoords) {
-      int nSym(getNSym(x, y, z));
+    parent.components = settings.components;
+    parent.state = xt::broadcast<int>(Air, {settings.sizeX, settings.sizeY, settings.sizeZ});
+    for (auto const &[x, y, z]: allowedCoords) {
+      int nSym = getNSym(x, y, z);
       allowedTiles.clear();
-      for (int tile{}; tile < Air; ++tile)
-        if (parent.limit[tile] < 0 || parent.limit[tile] >= nSym)
+      for (int tile{}; tile < settings.components.size(); ++tile) {
+        if (parent.components.at(tile).getLimit() < 0 || parent.components.at(tile).getLimit() >= nSym) {
           allowedTiles.emplace_back(tile);
-      if (allowedTiles.empty())
+        }
+      }
+      if (allowedTiles.empty()) {
         break;
-      int newTile(allowedTiles[std::uniform_int_distribution<>(0, static_cast<int>(allowedTiles.size() - 1))(rng)]);
-      parent.limit[newTile] -= nSym;
+      }
+      int newTile = allowedTiles[std::uniform_int_distribution<>(0, static_cast<int>(allowedTiles.size() - 1))(rng)];
+      parent.components.at(newTile).setLimit(parent.components.at(newTile).getLimit() - nSym);
       setTileWithSym(parent, x, y, z, newTile);
     }
     evaluator.run(parent.state, parent.value);
   }
 
-  Opt::Opt(const Settings &settings, bool useNet)
-    :settings(settings), evaluator(settings),
-    nEpisode(), nStage(), nIteration(), nConverge(),
-    maxConverge(std::min(7 * 7 * 7, settings.sizeX * settings.sizeY * settings.sizeZ) * 16),
-    infeasibilityPenalty(), bestChanged(true), redrawNagle(), lossHistory(nLossHistory), lossChanged() {
-    for (int x(settings.symX ? settings.sizeX / 2 : 0); x < settings.sizeX; ++x)
-      for (int y(settings.symY ? settings.sizeY / 2 : 0); y < settings.sizeY; ++y)
-        for (int z(settings.symZ ? settings.sizeZ / 2 : 0); z < settings.sizeZ; ++z)
+  Opt::Opt(const Settings &settings, bool useNet) :
+      settings(settings), evaluator(settings), nEpisode(), nStage(), nIteration(), nConverge(),
+      maxConverge(std::min(7 * 7 * 7, settings.sizeX * settings.sizeY * settings.sizeZ) * 16), infeasibilityPenalty(), bestChanged(true), redrawNagle(),
+      lossHistory(nLossHistory), lossChanged() {
+    for (int x(settings.symX ? settings.sizeX / 2 : 0); x < settings.sizeX; ++x) {
+      for (int y(settings.symY ? settings.sizeY / 2 : 0); y < settings.sizeY; ++y) {
+        for (int z(settings.symZ ? settings.sizeZ / 2 : 0); z < settings.sizeZ; ++z) {
           allowedCoords.emplace_back(x, y, z);
+        }
+      }
+    }
 
     restart();
     if (useNet) {
@@ -42,14 +46,11 @@ namespace Fission {
     }
     parentFitness = currentFitness(parent);
 
-    best.state = xt::broadcast<int>(Air,
-      {settings.sizeX, settings.sizeY, settings.sizeZ});
+    best.state = xt::broadcast<int>(Air, {settings.sizeX, settings.sizeY, settings.sizeZ});
     evaluator.run(best.state, best.value);
   }
 
-  bool Opt::feasible(const Evaluation &x) const {
-    return !settings.ensureHeatNeutral || x.netHeat <= 0.0;
-  }
+  bool Opt::feasible(const Evaluation &x) const { return !settings.ensureHeatNeutral || x.netHeat <= 0.0; }
 
   double Opt::rawFitness(const Evaluation &x) const {
     switch (settings.goal) {
@@ -76,12 +77,15 @@ namespace Fission {
 
   int Opt::getNSym(int x, int y, int z) const {
     int result(1);
-    if (settings.symX && x != settings.sizeX - x - 1)
+    if (settings.symX && x != settings.sizeX - x - 1) {
       result *= 2;
-    if (settings.symY && y != settings.sizeY - y - 1)
+    }
+    if (settings.symY && y != settings.sizeY - y - 1) {
       result *= 2;
-    if (settings.symZ && z != settings.sizeZ - z - 1)
+    }
+    if (settings.symZ && z != settings.sizeZ - z - 1) {
       result *= 2;
+    }
     return result;
   }
 
@@ -116,16 +120,20 @@ namespace Fission {
   void Opt::mutateAndEvaluate(Sample &sample, int x, int y, int z) {
     int nSym(getNSym(x, y, z));
     int oldTile(sample.state(x, y, z));
-    if (oldTile != Air)
-      sample.limit[oldTile] += nSym;
+    if (oldTile != Air) {
+      sample.components.at(oldTile).setLimit(sample.components.at(oldTile).getLimit() + nSym);
+    }
     allowedTiles.clear();
     allowedTiles.emplace_back(Air);
-    for (int tile{}; tile < Air; ++tile)
-      if (sample.limit[tile] < 0 || sample.limit[tile] >= nSym)
+    for (int tile{}; tile < settings.components.size(); ++tile) {
+      if (sample.components.at(tile).getLimit() < 0 || sample.components.at(tile).getLimit() >= nSym) {
         allowedTiles.emplace_back(tile);
+      }
+    }
     int newTile(allowedTiles[std::uniform_int_distribution<>(0, static_cast<int>(allowedTiles.size() - 1))(rng)]);
-    if (newTile != Air)
-      sample.limit[newTile] -= nSym;
+    if (newTile != Air) {
+      sample.components.at(newTile).setLimit(sample.components.at(newTile).getLimit() - nSym);
+    }
     setTileWithSym(sample, x, y, z, newTile);
     evaluator.run(sample.state, sample.value);
   }
@@ -137,8 +145,9 @@ namespace Fission {
         parentFitness = net->infer(parent);
         inferenceFailed = true;
       } else {
-        for (int i{}; i < nLossHistory - 1; ++i)
+        for (int i{}; i < nLossHistory - 1; ++i) {
           lossHistory[i] = lossHistory[i + 1];
+        }
         lossHistory[nLossHistory - 1] = net->train();
         lossChanged = true;
         --nIteration;
@@ -152,8 +161,9 @@ namespace Fission {
       if (nStage == StageInfer) {
         nStage = 0;
         ++nEpisode;
-        if (inferenceFailed)
+        if (inferenceFailed) {
           restart();
+        }
         net->newTrajectory();
         net->appendTrajectory(parent);
       } else if (feasible(parent.value) || infeasibilityPenalty > 1e8) {
@@ -170,27 +180,26 @@ namespace Fission {
         }
       } else {
         ++nStage;
-        if (infeasibilityPenalty)
+        if (infeasibilityPenalty) {
           infeasibilityPenalty *= 2;
-        else
+        } else {
           infeasibilityPenalty = std::uniform_real_distribution<>()(rng);
+        }
       }
       parentFitness = currentFitness(parent);
     }
 
     bool bestChangedLocal(!nEpisode && !nStage && !nIteration && feasible(parent.value));
-    if (bestChangedLocal)
+    if (bestChangedLocal) {
       best = parent;
-    std::uniform_int_distribution<>
-      xDist(0, settings.sizeX - 1),
-      yDist(0, settings.sizeY - 1),
-      zDist(0, settings.sizeZ - 1);
+    }
+    std::uniform_int_distribution<> xDist(0, settings.sizeX - 1), yDist(0, settings.sizeY - 1), zDist(0, settings.sizeZ - 1);
     int bestChild = 0;
     double bestFitness = 0.0;
     for (int i{}; i < children.size(); ++i) {
       auto &child(children[i]);
       child.state = parent.state;
-      std::copy(parent.limit, parent.limit + Air, child.limit);
+      child.components = parent.components;
       mutateAndEvaluate(child, xDist(rng), yDist(rng), zDist(rng));
       double fitness(currentFitness(child));
       if (!i || fitness > bestFitness) {
@@ -207,18 +216,21 @@ namespace Fission {
       if (bestFitness > parentFitness) {
         parentFitness = bestFitness;
         nConverge = 0;
-        if (nStage == StageInfer)
+        if (nStage == StageInfer) {
           inferenceFailed = false;
+        }
       }
       std::swap(parent, child);
-      if (net && nStage != StageInfer)
+      if (net && nStage != StageInfer) {
         net->appendTrajectory(parent);
+      }
     }
     ++nConverge;
     ++nIteration;
     if (bestChangedLocal) {
-      for (auto &[x, y, z] : best.value.invalidTiles)
+      for (auto &[x, y, z]: best.value.invalidTiles) {
         best.state(x, y, z) = Air;
+      }
       bestChanged = true;
     }
   }
@@ -244,8 +256,9 @@ namespace Fission {
 
   bool Opt::needsReplotLoss() {
     bool result(lossChanged);
-    if (result)
+    if (result) {
       lossChanged = false;
+    }
     return result;
   }
-}
+} // namespace Fission

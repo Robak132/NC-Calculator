@@ -1,11 +1,13 @@
-#include <xtensor/xrandom.hpp>
 #include "FissionNet.h"
+#include <xtensor/xrandom.hpp>
 
 namespace Fission {
-  Net::Net(Opt &opt) :opt(opt), mCorrector(1), rCorrector(1), trajectoryLength(), writePos() {
-    for (int i{}; i < Air; ++i)
-      if (opt.settings.limit[i])
+  Net::Net(Opt &opt) : opt(opt), mCorrector(1), rCorrector(1), trajectoryLength(), writePos() {
+    for (int i{}; i < opt.settings.components.size(); ++i) {
+      if (opt.settings.components.at(i).getLimit() > 0) {
         tileMap.emplace(i, tileMap.size());
+      }
+    }
     tileMap.emplace(Air, tileMap.size());
     nFeatures = static_cast<int>(tileMap.size() * 2 - 1 + nStatisticalFeatures);
     batchInput = xt::empty<double>({nMiniBatch, nFeatures});
@@ -35,31 +37,38 @@ namespace Fission {
 
   void Net::appendTrajectory(const Sample &sample) {
     ++trajectoryLength;
-    if (pool.size() == nPool)
+    if (pool.size() == nPool) {
       pool[writePos].first = extractFeatures(sample);
-    else
+    } else {
       pool.emplace_back(extractFeatures(sample), 0.0);
-    if (++writePos == nPool)
+    }
+    if (++writePos == nPool) {
       writePos = 0;
+    }
   }
 
   void Net::finishTrajectory(double target) {
     int pos(writePos);
     for (int i{}; i < trajectoryLength; ++i) {
-      if (--pos < 0)
+      if (--pos < 0) {
         pos = nPool - 1;
+      }
       pool[pos].second = target;
     }
   }
 
   xt::xtensor<double, 1> Net::extractFeatures(const Sample &sample) {
     xt::xtensor<double, 1> vInput(xt::zeros<double>({nFeatures}));
-    for (int x{}; x < opt.settings.sizeX; ++x)
-      for (int y{}; y < opt.settings.sizeY; ++y)
-        for (int z{}; z < opt.settings.sizeZ; ++z)
+    for (int x{}; x < opt.settings.sizeX; ++x) {
+      for (int y{}; y < opt.settings.sizeY; ++y) {
+        for (int z{}; z < opt.settings.sizeZ; ++z) {
           ++vInput[tileMap[sample.state(x, y, z)]];
-    for (auto &[x, y, z] : sample.value.invalidTiles)
+        }
+      }
+    }
+    for (auto &[x, y, z]: sample.value.invalidTiles) {
       ++vInput[tileMap.size() + tileMap[sample.state(x, y, z)]];
+    }
     vInput.periodic(-1) = sample.value.fuelCellMultiplier;
     vInput.periodic(-2) = sample.value.moderatorCellMultiplier;
     vInput.periodic(-3) = sample.value.cooling / opt.settings.fuelBaseHeat;
@@ -101,22 +110,28 @@ namespace Fission {
     double gbOutput(xt::sum(gvOutput)());
     xt::xtensor<double, 1> gwOutput(xt::sum(xt::view(gvOutput, xt::all(), xt::newaxis()) * vPwlLayer2, 0));
     xt::xtensor<double, 2> gvPwlLayer2(xt::empty_like(vPwlLayer2));
-    for (int i{}; i < nMiniBatch; ++i)
-      for (int j{}; j < nLayer2; ++j)
+    for (int i{}; i < nMiniBatch; ++i) {
+      for (int j{}; j < nLayer2; ++j) {
         gvPwlLayer2(i, j) = gvOutput(i) * wOutput(j);
+      }
+    }
     xt::xtensor<double, 2> gvLayer2(gvPwlLayer2 * (leak + (xt::abs(vLayer2) < 1.0)));
     xt::xtensor<double, 1> gbLayer2(xt::sum(gvLayer2, 0));
     xt::xtensor<double, 2> gwLayer2(xt::empty_like(wLayer2));
-    for (int i{}; i < nLayer2; ++i)
-      for (int j{}; j < nLayer1; ++j)
+    for (int i{}; i < nLayer2; ++i) {
+      for (int j{}; j < nLayer1; ++j) {
         gwLayer2(i, j) = xt::sum(xt::view(gvLayer2, xt::all(), i) * xt::view(vPwlLayer1, xt::all(), j))();
+      }
+    }
     xt::xtensor<double, 2> gvPwlLayer1(xt::sum(xt::view(gvLayer2, xt::all(), xt::all(), xt::newaxis()) * wLayer2, -2));
     xt::xtensor<double, 2> gvLayer1(gvPwlLayer1 * (leak + (xt::abs(vLayer1) < 1.0)));
     xt::xtensor<double, 1> gbLayer1(xt::sum(gvLayer1, 0));
     xt::xtensor<double, 2> gwLayer1(xt::empty_like(wLayer1));
-    for (int i{}; i < nLayer1; ++i)
-      for (int j{}; j < nFeatures; ++j)
+    for (int i{}; i < nLayer1; ++i) {
+      for (int j{}; j < nFeatures; ++j) {
         gwLayer1(i, j) = xt::sum(xt::view(gvLayer1, xt::all(), i) * xt::view(batchInput, xt::all(), j))();
+      }
+    }
 
     // Adam
     mCorrector *= mRate;
@@ -144,4 +159,4 @@ namespace Fission {
 
     return loss;
   }
-}
+} // namespace Fission

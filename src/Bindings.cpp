@@ -2,12 +2,8 @@
 #include <emscripten/bind.h>
 #include "FissionNet.h"
 
-static void setLimit(Fission::Settings &x, int index, int limit) {
-  x.limit[index] = limit;
-}
-
-static void setRate(Fission::Settings &x, int index, double rate) {
-  x.coolingRates[index] = rate;
+static void addComponent(Fission::Settings &x, const int id, const std::string &name, const std::string &type, const int limit, const int rate=0) {
+  x.components.try_emplace(id, Component(id, name, type, limit, rate));
 }
 
 static emscripten::val getData(const Fission::Sample &x) {
@@ -67,8 +63,7 @@ EMSCRIPTEN_BINDINGS(FissionOpt) {
     .property("sizeZ", &Fission::Settings::sizeZ)
     .property("fuelBasePower", &Fission::Settings::fuelBasePower)
     .property("fuelBaseHeat", &Fission::Settings::fuelBaseHeat)
-    .function("setLimit", &setLimit)
-    .function("setRate", &setRate)
+    .function("addComponent", &addComponent)
     .property("ensureHeatNeutral", &Fission::Settings::ensureHeatNeutral)
     .property("goal", &Fission::Settings::goal)
     .property("symX", &Fission::Settings::symX)

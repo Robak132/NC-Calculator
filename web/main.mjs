@@ -1,4 +1,14 @@
-import COMPONENTS from "../data/components.json" with { type: "json" };
+/** @typedef Heatsink
+ * @property {string} title
+ * @property {string} name
+ * @property {string} className
+ * @property {number} cooling_rate
+ * @property {number} active_cooling_rate
+ * @property {number} id
+ */
+
+/** @type {Heatsink[]} */
+import HEATSINKS from "../data/heatsinks.json" with {type: "json"};
 import "https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"
 import "https://code.jquery.com/jquery-3.5.0.slim.min.js"
 import "./FissionOpt.js";
@@ -6,33 +16,24 @@ import {Int16, Int32, write} from "https://cdn.jsdelivr.net/npm/nbtify@2.2.0/+es
 
 function createBlockTypeTable() {
   const table = $('<table></table>');
-  const thead = $('<thead><tr id="blockType"><th>Block Type</th></tr></thead>');
-  const rate = $('<tr id="rate"><th>Cooling Rate (H/t)</th></tr>');
-  const maxAllowed = $('<tr id="limit"><th>Max Allowed</th></tr>');
-  const activeRate = $('<tr id="activeRate"><th>Active Cooling Rate (H/t)</th></tr>');
-  const maxActiveAllowed = $('<tr id="activeLimit"><th>Max Active Allowed</th></tr>');
-  COMPONENTS.forEach(bt => {
-    thead.find('tr').append(`<td title="${bt.title}" class="${bt.name}">${bt.name}</td>`);
-    if (bt.cooling_rate == null) {
-      rate.append(`<td>—</td>`)
-    } else {
-      rate.append(`<td><input type="text" value="${bt.cooling_rate}"></td>`)
-    }
-    maxAllowed.append(`<td><input type="text"></td>`)
-    if (bt.active_cooling_rate == null) {
-      activeRate.append(`<td>—</td>`)
-      maxActiveAllowed.append(`<td>—</td>`)
-    } else {
-      activeRate.append(`<td><input type="text" value="${bt.active_cooling_rate}"></td>`)
-      maxActiveAllowed.append(`<td><input type="text" value="0"></td>`)
-    }
+  [
+    { id: "blockType", label: 'Block Type', getValue: bt => `<th title="${bt.title}" class="${bt.className}">${bt.name}</th>` },
+    { id: "rate", label: 'Cooling Rate (H/t)', getValue: bt => bt.cooling_rate ? `<td><input value="${bt.cooling_rate}"></td>` : `<td>&mdash;</td>` },
+    { id: "limit", label: 'Max Allowed', getValue: () => '<td><input type="text"></td>' },
+    { id: "activeRate", label: 'Active Cooling Rate (H/t)', getValue: bt => bt.active_cooling_rate ? `<td><input type="text" value="${bt.active_cooling_rate}"></td>` : `<td>&mdash;</td>` },
+    { id: "activeLimit", label: 'Max Active Allowed', getValue: bt => bt.active_cooling_rate ? '<td><input type="text" value="0"></td>' : `<td>&mdash;</td>` }
+  ].forEach(rowDef => {
+    const row = $(`<tr id="${rowDef.id}"></tr>`);
+    row.append(`<th>${rowDef.label}</th>`);
+    HEATSINKS.forEach(bt => row.append(rowDef.getValue(bt)))
+    let otherComponents = [
+      {name: '[]', title: "Cell", className: "cell"},
+      {name: '##', title: "Moderator", className: "mode"}
+    ]
+    otherComponents.forEach(bt => row.append(rowDef.getValue(bt)));
+    table.append(row);
   });
-  table.append(thead);
-  table.append(rate);
-  table.append(maxAllowed)
-  table.append(activeRate)
-  table.append(maxActiveAllowed)
-  $('.tables').empty().append(table);
+  $('.tables').append(table);
 }
 
 function displayTile(tile) {
@@ -52,9 +53,9 @@ function displayTile(tile) {
 }
 
 function saveTile(tile) {
-  if (tile >= COMPONENTS) {
-    tile -= COMPONENTS;
-    if (tile < COMPONENTS) {
+  if (tile >= HEATSINKS) {
+    tile -= HEATSINKS;
+    if (tile < HEATSINKS) {
       return "nuclearcraft:active_" + tileSaveNames[tile].toLowerCase().replaceAll(" ", "_") + "_heat_sink";
     } else {
       if (tile === tileTitles.length - 1) {
@@ -67,13 +68,22 @@ function saveTile(tile) {
   return "nuclearcraft:" + tileSaveNames[tile].toLowerCase().replaceAll(" ", "_") + "_heat_sink";
 }
 
+function formatInfo(label, value, unit) {
+  const row = $('<div></div>').addClass('info');
+  row.append('<div>' + label + '</div>');
+  row.append('<div>' + unit + '</div>');
+  row.append(Math.round(value * 100) / 100);
+  return row
+}
+
 $(() => { FissionOpt().then((FissionOpt) => {
   createBlockTypeTable()
-  const run = $('#run'), pause = $('#pause'), stop = $('#stop');
-  let opt = null
-  let timeout = null;
-  const fuelBasePower = $('#fuelBasePower');
-  const fuelBaseHeat = $('#fuelBaseHeat');
+  const run = $('#run'), pause = $('#pause'), stop = $('#stop'), design = $('#design');
+  const save = $('#save'), bgString = $('#bgString'), progress = $('#progress');
+  const fuelBasePower = $('#fuelBasePower'), fuelBaseHeat = $('#fuelBaseHeat');
+  const settings = new FissionOpt.FissionSettings();
+  let lossElement, lossPlot, opt = null, timeout = null;
+
   const fuelPresets = {
     TBU: [60*80, 18],
     LEU235: [120*80, 50],
@@ -110,50 +120,37 @@ $(() => { FissionOpt().then((FissionOpt) => {
     });
   }
 
-  const updateDisables = () => {
+  const rates = []
+  const limits = []
+  const activeRates = []
+  const activeLimits = []
+  $('#rate input').each(function() { rates.push($(this)); });
+  $('#limit input').each(function() { limits.push($(this)); });
+  $('#activeRate input').each(function() { activeRates.push($(this)); });
+  $('#activeLimit input').each(function() { activeLimits.push($(this)); });
+
+
+  function updateDisables() {
     $('#settings input').prop('disabled', opt !== null);
     $('#settings a')[opt === null ? 'removeClass' : 'addClass']('disabledLink');
     run[timeout === null ? 'removeClass' : 'addClass']('disabledLink');
     pause[timeout !== null ? 'removeClass' : 'addClass']('disabledLink');
     stop[opt !== null ? 'removeClass' : 'addClass']('disabledLink');
-  };
-
-  const rates = []
-  let limits = []
-  $('#rate input').each(function() { rates.push($(this)); });
-  $('#activeRate input').each(function() { rates.push($(this)); });
-  $('#limit input').each(function() { limits.push($(this)); });
-  $('#activeLimit input').each(function() { limits.push($(this)); });
-
-  const schedule = () => {
-    timeout = window.setTimeout(step, 0);
   }
 
-  const settings = new FissionOpt.FissionSettings();
-  const design = $('#design');
-  const save = $('#save');
-  const bgString = $('#bgString');
-
-  const displaySample = (sample) => {
+  function displaySample(sample) {
     design.empty();
     let block = $('<div></div>');
-    const appendInfo = (label, value, unit) => {
-      const row = $('<div></div>').addClass('info');
-      row.append('<div>' + label + '</div>');
-      row.append('<div>' + unit + '</div>');
-      row.append(Math.round(value * 100) / 100);
-      block.append(row);
-    };
-    appendInfo('Max Power', sample.getPower(), 'FE/t');
-    appendInfo('Avg Power', sample.getAvgPower(), 'FE/t');
-    appendInfo('Max Power (GT)', sample.getPower() / 8192, 'A (EV)');
-    appendInfo('Avg Power (GT)', sample.getAvgPower() / 8192, 'A (EV)');
-    appendInfo('Heat', sample.getHeat(), 'H/t');
-    appendInfo('Cooling', sample.getCooling(), 'H/t');
-    appendInfo('Net Heat', sample.getNetHeat(), 'H/t');
-    appendInfo('Duty Cycle', sample.getDutyCycle() * 100, '%');
-    appendInfo('Fuel Use Rate', sample.getAvgBreed(), '&times;');
-    appendInfo('Efficiency', sample.getEfficiency() * 100, '%');
+    block.append(formatInfo('Max Power', sample.getPower(), 'FE/t'));
+    block.append(formatInfo('Avg Power', sample.getAvgPower(), 'FE/t'));
+    block.append(formatInfo('Max Power (GT)', sample.getPower() / 8192, 'A (EV)'));
+    block.append(formatInfo('Avg Power (GT)', sample.getAvgPower() / 8192, 'A (EV)'));
+    block.append(formatInfo('Heat', sample.getHeat(), 'H/t'));
+    block.append(formatInfo('Cooling', sample.getCooling(), 'H/t'));
+    block.append(formatInfo('Net Heat', sample.getNetHeat(), 'H/t'));
+    block.append(formatInfo('Duty Cycle', sample.getDutyCycle() * 100, '%'));
+    block.append(formatInfo('Fuel Use Rate', sample.getAvgBreed(), '&times;'));
+    block.append(formatInfo('Efficiency', sample.getEfficiency() * 100, '%'));
     design.append(block);
 
     const shapes = [], strides = [], data = sample.getData();
@@ -252,7 +249,7 @@ $(() => { FissionOpt().then((FissionOpt) => {
     resourceMap = Object.entries(resourceMap);
     resourceMap.sort((x, y) => y[1] - x[1]);
     for (let resource of resourceMap) {
-      if (resource[0] === 64) continue;
+      if (resource[0] === HEATSINKS.length * 2 + 2) continue;
       const row = $('<div></div>');
       if (resource[0] < 0)
         row.append('Casing');
@@ -263,19 +260,18 @@ $(() => { FissionOpt().then((FissionOpt) => {
     design.append(block);
   }
 
-  const progress = $('#progress');
-  let lossElement, lossPlot;
-
   function step() {
-    schedule();
+    timeout = window.setTimeout(step, 0);
     opt.stepInteractive();
     const nStage = opt.getNStage();
-    if (nStage === -2)
+    if (nStage === -2) {
       progress.text('Episode ' + opt.getNEpisode() + ', training iteration ' + opt.getNIteration());
-    else if (nStage === -1)
+    } else if (nStage === -1) {
       progress.text('Episode ' + opt.getNEpisode() + ', inference iteration ' + opt.getNIteration());
-    else
+    } else {
       progress.text('Episode ' + opt.getNEpisode() + ', stage ' + nStage + ', iteration ' + opt.getNIteration());
+    }
+
     if (opt.needsRedrawBest()) {
       displaySample(opt.getBest());
     }
@@ -304,6 +300,11 @@ $(() => { FissionOpt().then((FissionOpt) => {
           throw Error(name + " must be a positive number");
         return result;
       };
+      const parseLimits = (x) => {
+        let result = parseInt(x)
+        result = result >= 0 && !isNaN(result) ? result : -1;
+        return result;
+      };
       try {
         settings.sizeX = parseSize($('#sizeX').val());
         settings.sizeY = parseSize($('#sizeY').val());
@@ -321,12 +322,20 @@ $(() => { FissionOpt().then((FissionOpt) => {
         settings.modHeatMult = parsePositiveFloat('Moderator Heat Multiplier', $('#modHeatMult').val());
         settings.FEGenMult = parsePositiveFloat('FE Generation Multiplier', $('#FEGenMult').val());
         settings.activeHeatsinkPrime = $('#activeHeatsinkPrime').is(':checked');
-        $.each(rates, (i, x) => { settings.setRate(i, parsePositiveFloat('Cooling Rate', x.val())); });
-        $.each(limits, (i, x) => {
-          x = parseInt(x.val());
-          settings.setLimit(i, x >= 0 ? x : -1);
-        });
-        console.log(settings)
+
+        let index = 0
+        HEATSINKS.forEach((value, i) => {
+          settings.addComponent(index, "passive", parseLimits(limits[i].val()), parsePositiveFloat('Cooling Rate', rates[i].val()));
+          index++;
+        })
+        HEATSINKS.forEach((value, i) => {
+          if (value.active_cooling_rate) {
+            settings.addComponent(index, "active", parseLimits(activeLimits[i].val()), parsePositiveFloat('Active Cooling Rate', activeRates[i].val()));
+            index++;
+          }
+        })
+        settings.addComponent(index, "cell", -1);
+        settings.addComponent(index+1, "moderator", -1);
       } catch (error) {
         alert('Error: ' + error.message);
         return;
@@ -334,8 +343,7 @@ $(() => { FissionOpt().then((FissionOpt) => {
       design.empty();
       save.off('click');
       save.addClass('disabledLink');
-      if (lossElement !== undefined)
-        lossElement.remove();
+      if (lossElement !== undefined) lossElement.remove();
       const useNet = $('#useNet').is(':checked');
       if (useNet) {
         lossElement = $('<canvas></canvas>').attr('width', 1024).attr('height', 128).insertAfter(progress);
@@ -347,7 +355,7 @@ $(() => { FissionOpt().then((FissionOpt) => {
       }
       opt = new FissionOpt.FissionOpt(settings, useNet);
     }
-    schedule();
+    timeout = window.setTimeout(step, 0);
     updateDisables();
   });
   pause.click(() => {
