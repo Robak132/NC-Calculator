@@ -253,10 +253,6 @@ namespace Fission {
               isActive(x, y, z) = countActiveNeighbors(Quartz, x, y, z)
               && countActiveNeighbors(Lapis, x, y, z);
               break;
-            case Villiaumite:
-              isActive(x, y, z) = countActiveNeighbors(EndStone, x, y, z)
-              && countActiveNeighbors(Redstone, x, y, z);
-              break;
             case Boron:
               isActive(x, y, z) = countActiveNeighbors(Quartz, x, y, z)
               && (countCasingNeighbors(x, y, z) || countActiveNeighbors(Moderator, x, y, z));
