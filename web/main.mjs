@@ -49,19 +49,13 @@ function displayTile(tile) {
 }
 
 function saveTile(tile) {
-  if (tile >= COMPONENTS) {
-    tile -= COMPONENTS;
-    if (tile < COMPONENTS) {
-      return "nuclearcraft:active_" + tileSaveNames[tile].toLowerCase().replaceAll(" ", "_") + "_heat_sink";
-    } else {
-      if (tile === tileTitles.length - 1) {
-        return "minecraft:air";
-      } else {
-        return "nuclearcraft:" + tileSaveNames[tile];
-      }
+  if (tile >= COMPONENTS.length) {
+    tile -= COMPONENTS.length - 3;
+    if (tile < COMPONENTS.length - 3) {
+      return COMPONENTS[tile].saveName.replaceAll("nuclearcraft:", "nuclearcraft:active_");
     }
   }
-  return "nuclearcraft:" + tileSaveNames[tile].toLowerCase().replaceAll(" ", "_") + "_heat_sink";
+  return COMPONENTS[tile].saveName
 }
 
 function formatInfo(label, value, unit) {
