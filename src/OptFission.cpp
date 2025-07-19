@@ -11,14 +11,15 @@ namespace Fission {
     parent.state = xt::broadcast<int>(Air,
       {settings.sizeX, settings.sizeY, settings.sizeZ});
     for (auto const &[x, y, z] : allowedCoords) {
-      int nSym(getNSym(x, y, z));
+      const int nSym = getNSym(x, y, z);
       allowedTiles.clear();
       for (int tile{}; tile < Air; ++tile)
         if (parent.limit[tile] < 0 || parent.limit[tile] >= nSym)
           allowedTiles.emplace_back(tile);
-      if (allowedTiles.empty())
+      if (allowedTiles.empty()) {
         break;
-      int newTile(allowedTiles[std::uniform_int_distribution<>(0, static_cast<int>(allowedTiles.size() - 1))(rng)]);
+      }
+      const int newTile = allowedTiles[std::uniform_int_distribution<>(0, static_cast<int>(allowedTiles.size() - 1))(rng)];
       parent.limit[newTile] -= nSym;
       setTileWithSym(parent, x, y, z, newTile);
     }
@@ -181,10 +182,9 @@ namespace Fission {
     bool bestChangedLocal(!nEpisode && !nStage && !nIteration && feasible(parent.value));
     if (bestChangedLocal)
       best = parent;
-    std::uniform_int_distribution<>
-      xDist(0, settings.sizeX - 1),
-      yDist(0, settings.sizeY - 1),
-      zDist(0, settings.sizeZ - 1);
+    auto xDist = std::uniform_int_distribution(0, settings.sizeX - 1);
+    auto yDist = std::uniform_int_distribution(0, settings.sizeY - 1);
+    auto zDist = std::uniform_int_distribution(0, settings.sizeZ - 1);
     int bestChild = 0;
     double bestFitness = 0.0;
     for (int i{}; i < children.size(); ++i) {

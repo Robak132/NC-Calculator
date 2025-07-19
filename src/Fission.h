@@ -7,10 +7,7 @@ namespace Fission {
 
   enum {
     // Cooler
-    Water, Redstone, Helium, Enderium, Cryotheum, Nitrogen, Quartz, Gold,
-    Glowstone, Lapis, Diamond, Iron, Emerald, Copper, Tin, Magnesium,
-    Manganese, EndStone, Arsenic, Prismarine, Obsidian, Aluminium,
-    Boron, Silver, Fluorite, NetherBrick, Lead, Purpur, Slime, Lithium, Active,
+    Active = 30,
     // Other
     Cell = Active * 2, Moderator, Air
   };
@@ -48,15 +45,15 @@ namespace Fission {
 
   class Evaluator {
     const Settings &settings;
-    xt::xtensor<int, 3> rules;
-    xt::xtensor<bool, 3> isActive, isModeratorInLine, visited;
-    const xt::xtensor<int, 3> *state;
+    xt::xtensor<int, std::string> rules;
+    xt::xtensor<bool, 3> active, moderatorInLine, visited;
+    const xt::xtensor<int, 3> *state = new xt::xtensor<int, 3>;
     
     int getTileSafe(int x, int y, int z) const;
     bool hasCellInLine(int x, int y, int z, int dx, int dy, int dz);
     int countAdjFuelCells(int x, int y, int z);
-    int isActiveSafe(int tile, int x, int y, int z) const;
-    int countActiveNeighbors(int tile, int x, int y, int z) const;
+    int isActiveSafe(std::string tile, int x, int y, int z) const;
+    int countActiveNeighbors(const std::string &tile, int x, int y, int z) const;
     bool isTileSafe(int tile, int x, int y, int z) const;
     int countNeighbors(int tile, int x, int y, int z) const;
     int countCasingNeighbors(int x, int y, int z) const;
