@@ -49,7 +49,7 @@ function displayTile(tile) {
 }
 
 function saveTile(tile) {
-  if (tile >= COMPONENTS.length) {
+  if (tile >= COMPONENTS.length - 3) {
     tile -= COMPONENTS.length - 3;
     if (tile < COMPONENTS.length - 3) {
       return COMPONENTS[tile].saveName.replaceAll("nuclearcraft:", "nuclearcraft:active_");
