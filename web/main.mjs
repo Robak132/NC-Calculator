@@ -8,7 +8,7 @@
  */
 
 /** @type {Component[]} */
-import COMPONENTS from "components.json" with {type: "json"};
+import COMPONENTS from "./components.json" with {type: "json"};
 import "https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"
 import "https://code.jquery.com/jquery-3.5.0.slim.min.js"
 import "./FissionOpt.js";
