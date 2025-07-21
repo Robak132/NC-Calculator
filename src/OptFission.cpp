@@ -7,13 +7,13 @@
 namespace Fission {
   void Opt::restart() {
     std::shuffle(allowedCoords.begin(), allowedCoords.end(), rng);
-    std::copy(settings.limit, settings.limit + Air, parent.limit);
-    parent.state = xt::broadcast<int>(Air,
+    std::copy(settings.limit, settings.limit + 60, parent.limit);
+    parent.state = xt::broadcast<int>(Evaluator::tiles.size() - 1,
       {settings.sizeX, settings.sizeY, settings.sizeZ});
     for (auto const &[x, y, z] : allowedCoords) {
       const int nSym = getNSym(x, y, z);
       allowedTiles.clear();
-      for (int tile{}; tile < Air; ++tile)
+      for (int tile{}; tile < Evaluator::tiles.size() - 1; ++tile)
         if (parent.limit[tile] < 0 || parent.limit[tile] >= nSym)
           allowedTiles.emplace_back(tile);
       if (allowedTiles.empty()) {
@@ -43,7 +43,7 @@ namespace Fission {
     }
     parentFitness = currentFitness(parent);
 
-    best.state = xt::broadcast<int>(Air,
+    best.state = xt::broadcast<int>(Evaluator::tiles.size() - 1,
       {settings.sizeX, settings.sizeY, settings.sizeZ});
     evaluator.run(best.state, best.value);
   }
@@ -117,7 +117,7 @@ namespace Fission {
   void Opt::mutateAndEvaluate(Sample &sample, int x, int y, int z) {
     int nSym(getNSym(x, y, z));
     int oldTile(sample.state(x, y, z));
-    if (oldTile != Air)
+    if (oldTile != Evaluator::Air()->getId())
       sample.limit[oldTile] += nSym;
     allowedTiles.clear();
     allowedTiles.emplace_back(Air);

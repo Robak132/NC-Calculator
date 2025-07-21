@@ -5,11 +5,25 @@ using json = nlohmann::json;
 
 namespace Fission {
   class Tile {
-    static std::vector<json, std::less<>> tiles;
-    static std::map<std::string, int, std::less<>> lookupTiles;
+    int id;
+    std::string name;
+    std::string fullName;
+    std::string type;
+    int coolingRate;
+
   public:
-    static void loadTiles();
-    static int getTileID(const std::string &name);
+    Tile(const int id, const std::string &name, const std::string &fullName, const std::string &type, const int coolingRate) :
+        id(id), name(name), fullName(fullName), type(type), coolingRate(coolingRate) {}
+
+    int getId() const { return id; }
+    std::string getName() const { return name; }
+    std::string getFullname() const { return fullName; }
+    std::string getType() const { return type; }
+    bool isPassive() const { return type == "passive"; }
+    bool isActive() const { return type == "active"; }
+    bool isCell() const { return type == "cell"; }
+    bool isModerator() const { return type == "moderator"; }
+    int getCoolingRate() const { return coolingRate; }
   };
 } // namespace Fission
 

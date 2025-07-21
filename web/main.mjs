@@ -8,7 +8,7 @@
  */
 
 /** @type {Component[]} */
-import COMPONENTS from "../data/components.json" with {type: "json"};
+import COMPONENTS from "./components.json" with {type: "json"};
 import "https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"
 import "https://code.jquery.com/jquery-3.5.0.slim.min.js"
 import "./FissionOpt.js";
@@ -18,14 +18,12 @@ function createBlockTypeTable() {
   const table = $('<table></table>');
   [
     { id: "blockType", label: 'Block Type', getValue: bt => `<th title="${bt.title}" class="${bt.className}">${bt.name}</th>` },
-    { id: "rate", label: 'Cooling Rate (H/t)', getValue: bt => bt.cooling_rate ? `<td><input value="${bt.cooling_rate}"></td>` : `<td>&mdash;</td>` },
-    { id: "limit", label: 'Max Allowed', getValue: () => '<td><input type="text"></td>' },
-    { id: "activeRate", label: 'Active Cooling Rate (H/t)', getValue: bt => bt.active_cooling_rate ? `<td><input type="text" value="${bt.active_cooling_rate}"></td>` : `<td>&mdash;</td>` },
-    { id: "activeLimit", label: 'Max Active Allowed', getValue: bt => bt.active_cooling_rate ? '<td><input type="text" value="0"></td>' : `<td>&mdash;</td>` }
+    { id: "rate", label: 'Cooling Rate (H/t)', getValue: bt => (bt.cooling_rate || bt.active_cooling_rate) ? `<td><input value="${bt.cooling_rate || bt.active_cooling_rate}"></td>` : `<td>&mdash;</td>` },
+    { id: "limit", label: 'Max Allowed', getValue: bt => `<td><input type="text" value="${bt.active_cooling_rate ? "0" : ""}"></td>`}
   ].forEach(rowDef => {
     const row = $(`<tr id="${rowDef.id}"></tr>`);
     row.append(`<th>${rowDef.label}</th>`);
-    COMPONENTS.forEach(bt => row.append(rowDef.getValue(bt)))
+    COMPONENTS.toSpliced(-1).forEach(bt => row.append(rowDef.getValue(bt)))
     table.append(row);
   });
   $('.tables').append(table);
@@ -112,12 +110,8 @@ $(() => { FissionOpt().then((FissionOpt) => {
 
   const rates = []
   const limits = []
-  const activeRates = []
-  const activeLimits = []
   $('#rate input').each(function() { rates.push($(this)); });
   $('#limit input').each(function() { limits.push($(this)); });
-  $('#activeRate input').each(function() { activeRates.push($(this)); });
-  $('#activeLimit input').each(function() { activeLimits.push($(this)); });
 
 
   function updateDisables() {
@@ -313,22 +307,13 @@ $(() => { FissionOpt().then((FissionOpt) => {
         settings.FEGenMult = parsePositiveFloat('FE Generation Multiplier', $('#FEGenMult').val());
         settings.activeComponentPrime = $('#activeComponentPrime').is(':checked');
 
-        let index = 0
         for (let i = 0; i < COMPONENTS.length - 3; i++){
-          settings.setLimit(index, parseLimits(limits[i].val()))
-          settings.setRate(index, parsePositiveFloat('Cooling Rate', rates[i].val()));
-          index++;
+          settings.setLimit(i, parseLimits(limits[i].val()))
+          settings.setRate(i, parsePositiveFloat('Cooling Rate', rates[i].val()));
         }
-        for (let i = 0; i < COMPONENTS.length; i++) {
-          let value = COMPONENTS[i];
-          if (value.active_cooling_rate) {
-            settings.setLimit(index, parseLimits(activeLimits[i].val()))
-            settings.setRate(index, parsePositiveFloat('Cooling Rate', activeRates[i].val()));
-          }
-          index++;
-        }
-        settings.setLimit((COMPONENTS.length - 3) * 2, parseLimits(limits[COMPONENTS.length - 3].val())) // Cells
-        settings.setLimit((COMPONENTS.length - 3) * 2 + 1 , parseLimits(limits[COMPONENTS.length - 2].val())) // Moderators
+        settings.setLimit(COMPONENTS.length - 3, parseLimits(limits[COMPONENTS.length - 3].val())) // Cells
+        settings.setLimit(COMPONENTS.length - 2, parseLimits(limits[COMPONENTS.length - 2].val())) // Moderators
+        settings.loadJson(JSON.stringify(COMPONENTS));
       } catch (error) {
         alert('Error: ' + error.message);
         return;

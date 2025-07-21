@@ -3,10 +3,10 @@
 
 namespace Fission {
   Net::Net(Opt &opt) :opt(opt), mCorrector(1), rCorrector(1), trajectoryLength(), writePos() {
-    for (int i{}; i < Air; ++i)
+    for (int i{}; i < Evaluator::tiles.size() - 1; ++i)
       if (opt.settings.limit[i])
         tileMap.emplace(i, tileMap.size());
-    tileMap.emplace(Air, tileMap.size());
+    tileMap.emplace(Evaluator::tiles.size() - 1, tileMap.size());
     nFeatures = static_cast<int>(tileMap.size() * 2 - 1 + nStatisticalFeatures);
     batchInput = xt::empty<double>({nMiniBatch, nFeatures});
     batchTarget = xt::empty<double>({nMiniBatch});

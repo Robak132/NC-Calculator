@@ -6,7 +6,7 @@
 
 namespace Fission {
   struct Sample {
-    int limit[Air];
+    int limit[60];
     xt::xtensor<int, 3> state;
     Evaluation value;
   };

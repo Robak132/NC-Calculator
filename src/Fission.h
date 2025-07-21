@@ -2,15 +2,12 @@
 #define _FISSION_H_
 #include <xtensor/xtensor.hpp>
 
-namespace Fission {
-  using Coords = std::vector<std::tuple<int, int, int>>;
+#include "Tile.h"
+using json = nlohmann::json;
 
-  enum {
-    // Cooler
-    Active = 30,
-    // Other
-    Cell = Active * 2, Moderator, Air
-  };
+namespace Fission {
+  class Tile;
+  using Coords = std::vector<std::tuple<int, int, int>>;
 
   enum {
     GoalPower,
@@ -21,13 +18,14 @@ namespace Fission {
   struct Settings {
     int sizeX, sizeY, sizeZ;
     double fuelBasePower, fuelBaseHeat;
-    int limit[Air];
-    double coolingRates[Cell];
+    int limit[60];
+    double coolingRates[60];
     bool ensureHeatNeutral;
     int goal;
     bool symX, symY, symZ;
     bool activeHeatsinkPrime;
     double genMult, heatMult, modFEMult, modHeatMult, FEGenMult;
+    json data;
   };
 
   struct Evaluation {
@@ -45,19 +43,29 @@ namespace Fission {
 
   class Evaluator {
     const Settings &settings;
-    xt::xtensor<int, std::string> rules;
+    xt::xtensor<Tile*, 3> rules;
     xt::xtensor<bool, 3> active, moderatorInLine, visited;
-    const xt::xtensor<int, 3> *state = new xt::xtensor<int, 3>;
-    
+    const xt::xtensor<int, 3> *state;
+
+    static void loadTiles(const Settings &settings);
+    static Tile *getTile(const std::string &name);
+    static Tile *Cell();
+    static Tile *Moderator();
+    static Tile *Air();
+
+
     int getTileSafe(int x, int y, int z) const;
     bool hasCellInLine(int x, int y, int z, int dx, int dy, int dz);
     int countAdjFuelCells(int x, int y, int z);
-    int isActiveSafe(std::string tile, int x, int y, int z) const;
+    int isActiveSafe(const std::string &tile, int x, int y, int z) const;
     int countActiveNeighbors(const std::string &tile, int x, int y, int z) const;
-    bool isTileSafe(int tile, int x, int y, int z) const;
-    int countNeighbors(int tile, int x, int y, int z) const;
+    bool isTileSafe(const std::string &tile, int x, int y, int z) const;
+    int countNeighbors(const std::string &tile, int x, int y, int z) const;
     int countCasingNeighbors(int x, int y, int z) const;
   public:
+    static std::vector<std::unique_ptr<Tile>> tiles;
+    static std::map<std::string, Tile*, std::less<>> lookupTiles;
+
     Evaluator(const Settings &settings);
     void run(const xt::xtensor<int, 3> &currentState, Evaluation &result);
   };
