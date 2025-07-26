@@ -4,10 +4,12 @@
 #include <nlohmann/json.hpp>
 
 static void setLimit(Fission::Settings &x, int index, int limit) {
+  std::cout << "Setting limit " << limit << " for " << index << std::endl;
   x.limit[index] = limit;
 }
 
 static void setRate(Fission::Settings &x, int index, double rate) {
+  std::cout << "Setting limit " << rate << " for " << index << std::endl;
   x.coolingRates[index] = rate;
 }
 

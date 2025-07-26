@@ -30,14 +30,8 @@ function createBlockTypeTable() {
 }
 
 function displayTile(tile) {
-  let active = false;
-  if (tile >= COMPONENTS.length - 3) {
-    tile -= COMPONENTS.length - 3;
-    if (tile < COMPONENTS.length - 3)
-      active = true;
-  }
-  const result = $('<span>' + COMPONENTS[tile].name + '</span>').addClass(COMPONENTS[tile].className);
-  if (active) {
+  const result = $(`<span>${COMPONENTS[tile].name}</span>`).addClass(COMPONENTS[tile].className);
+  if (COMPONENTS[tile].type === 'active') {
     result.attr('title', `Active ${COMPONENTS[tile].title}`);
     result.css('outline', '2px dashed black')
   } else {
@@ -47,12 +41,6 @@ function displayTile(tile) {
 }
 
 function saveTile(tile) {
-  if (tile >= COMPONENTS.length) {
-    tile -= COMPONENTS.length - 3;
-    if (tile < COMPONENTS.length - 3) {
-      return COMPONENTS[tile].saveName.replaceAll("nuclearcraft:", "nuclearcraft:active_");
-    }
-  }
   return COMPONENTS[tile].saveName
 }
 
@@ -61,6 +49,19 @@ function formatInfo(label, value, unit) {
   row.append('<div>' + label + '</div>');
   row.append('<div>' + unit + '</div>');
   row.append(Math.round(value * 100) / 100);
+  return row
+}
+function formatInfoGT(label, value) {
+  const row = $('<div></div>').addClass('info');
+  row.append('<div>' + label + '</div>');
+  row.append(
+      `<select id="selectGT">
+        <option value="1" selected>A (EV)</option>
+        <option value="4">A (IV)</option>
+        <option value="16">A (LuV)</option>
+      </select>`);
+  const selectGT = row.find('#selectGT');
+  row.append(Math.round(value * 100) / 100 / selectGT.val());
   return row
 }
 
@@ -127,8 +128,8 @@ $(() => { FissionOpt().then((FissionOpt) => {
     let block = $('<div></div>');
     block.append(formatInfo('Max Power', sample.getPower(), 'FE/t'));
     block.append(formatInfo('Avg Power', sample.getAvgPower(), 'FE/t'));
-    block.append(formatInfo('Max Power (GT)', sample.getPower() / 8192, 'A (EV)'));
-    block.append(formatInfo('Avg Power (GT)', sample.getAvgPower() / 8192, 'A (EV)'));
+    block.append(formatInfoGT('Max Power (GT)', sample.getPower() / 8192));
+    block.append(formatInfoGT('Avg Power (GT)', sample.getAvgPower() / 8192));
     block.append(formatInfo('Heat', sample.getHeat(), 'H/t'));
     block.append(formatInfo('Cooling', sample.getCooling(), 'H/t'));
     block.append(formatInfo('Net Heat', sample.getNetHeat(), 'H/t'));
@@ -233,7 +234,7 @@ $(() => { FissionOpt().then((FissionOpt) => {
     resourceMap = Object.entries(resourceMap);
     resourceMap.sort((x, y) => y[1] - x[1]);
     for (let resource of resourceMap) {
-      if (parseInt(resource[0]) === (COMPONENTS.length - 3) * 2 + 2) continue;
+      if (parseInt(resource[0]) === COMPONENTS.length - 1) continue;
       const row = $('<div></div>');
       if (resource[0] < 0)
         row.append('Casing');

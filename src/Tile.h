@@ -14,6 +14,8 @@ namespace Fission {
   public:
     Tile(const int id, const std::string &name, const std::string &fullName, const std::string &type, const int coolingRate) :
         id(id), name(name), fullName(fullName), type(type), coolingRate(coolingRate) {}
+    Tile(const Tile &other) :
+        id(other.id), name(other.name), fullName(other.fullName), type(other.type), coolingRate(other.coolingRate) {}
 
     int getId() const { return id; }
     std::string getName() const { return name; }

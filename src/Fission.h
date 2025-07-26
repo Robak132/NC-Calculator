@@ -48,11 +48,6 @@ namespace Fission {
     const xt::xtensor<int, 3> *state;
 
     static void loadTiles(const Settings &settings);
-    static Tile *getTile(const std::string &name);
-    static Tile *Cell();
-    static Tile *Moderator();
-    static Tile *Air();
-
 
     int getTileSafe(int x, int y, int z) const;
     bool hasCellInLine(int x, int y, int z, int dx, int dy, int dz);
@@ -65,6 +60,11 @@ namespace Fission {
   public:
     static std::vector<std::unique_ptr<Tile>> tiles;
     static std::map<std::string, Tile*, std::less<>> lookupTiles;
+
+    static Tile *getTile(const std::string &name);
+    static Tile *Cell();
+    static Tile *Moderator();
+    static Tile *Air();
 
     Evaluator(const Settings &settings);
     void run(const xt::xtensor<int, 3> &currentState, Evaluation &result);

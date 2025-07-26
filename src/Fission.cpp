@@ -5,16 +5,8 @@
 #include "Tile.h"
 
 namespace Fission {
-  std::vector<std::unique_ptr<Tile>> Evaluator::tiles = {
-    std::make_unique<Tile>(0, "Air", "Air", "air", 0),
-    std::make_unique<Tile>(1, "Fuel Cell", "Fuel Cell", "cell", 1),
-    std::make_unique<Tile>(2, "Moderator", "Moderator", "moderator", 0),
-  };
-  std::map<std::string, Tile*, std::less<>> Evaluator::lookupTiles = {
-    {"Air", tiles[0].get()},
-    {"Fuel Cell", tiles[1].get()},
-    {"Moderator", tiles[2].get()}
-  };
+  std::vector<std::unique_ptr<Tile>> Evaluator::tiles;
+  std::map<std::string, Tile*, std::less<>> Evaluator::lookupTiles;
 
   void Evaluation::compute(const Settings &settings) {
     const double moderatorsFE = moderatorCellMultiplier * settings.modFEMult / 100.0;
@@ -48,6 +40,7 @@ namespace Fission {
   }
 
   void Evaluator::loadTiles(const Settings &settings) {
+    std::cout << "Loading tiles..." << std::endl;
     auto data = settings.data;
     tiles.reserve(data.size());
 
@@ -112,7 +105,7 @@ namespace Fission {
       return false;
     }
     const Tile *tilePtr = getTile(tile);
-    return (*state)(x, y, z) == tilePtr->getId() && active(x, y, z) && (tilePtr->getType() == Passive || tilePtr->getType() == TileType::Moderator || settings.activeHeatsinkPrime);
+    return (*state)(x, y, z) == tilePtr->getId() && active(x, y, z) && (tilePtr->isPassive() || tilePtr->isModerator() || settings.activeHeatsinkPrime);
   }
 
   int Evaluator::countActiveNeighbors(const std::string &tile, const int x, const int y, int const z) const {
@@ -153,7 +146,7 @@ namespace Fission {
   }
 
   void Evaluator::run(const xt::xtensor<int, 3> &currentState, Evaluation &result) {
-    std::cout << "Running evaluation..." << std::endl;
+    // std::cout << "Running evaluation..." << std::endl;
     result.invalidTiles.clear();
     result.cellsHeatMult = 0;
     result.cellsEnergyMult = 0;
@@ -167,7 +160,7 @@ namespace Fission {
     for (int x{}; x < settings.sizeX; ++x) {
       for (int y{}; y < settings.sizeY; ++y) {
         for (int z{}; z < settings.sizeZ; ++z) {
-          std::cout << "debug: (" << x << ", " << y << ", " << z << ") = " << (*this->state)(x, y, z) << std::endl;
+          // std::cout << "debug: (" << x << ", " << y << ", " << z << ") = " << (*this->state)(x, y, z) << std::endl;
           if (Tile *tile = tiles.at((*this->state)(x, y, z)).get(); tile == Cell()) {
             const int adjFuelCells = countAdjFuelCells(x, y, z);
             rules(x, y, z) = nullptr;
@@ -176,7 +169,7 @@ namespace Fission {
             result.cellsEnergyMult += adjFuelCells + 1;
             result.moderatorCellMultiplier += countActiveNeighbors("Moderator", x, y, z) * (adjFuelCells + 1);
           } else {
-            if (tile->getType() == Passive || tile->getType() == Active) {
+            if (tile->isPassive() || tile->isActive()) {
               rules(x, y, z) = tile;
             } else {
               rules(x, y, z) = nullptr;

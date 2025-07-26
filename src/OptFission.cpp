@@ -120,12 +120,12 @@ namespace Fission {
     if (oldTile != Evaluator::Air()->getId())
       sample.limit[oldTile] += nSym;
     allowedTiles.clear();
-    allowedTiles.emplace_back(Air);
-    for (int tile{}; tile < Air; ++tile)
+    allowedTiles.emplace_back(Evaluator::Air()->getId());
+    for (int tile{}; tile < Evaluator::Air()->getId(); ++tile)
       if (sample.limit[tile] < 0 || sample.limit[tile] >= nSym)
         allowedTiles.emplace_back(tile);
     int newTile(allowedTiles[std::uniform_int_distribution<>(0, static_cast<int>(allowedTiles.size() - 1))(rng)]);
-    if (newTile != Air)
+    if (newTile != Evaluator::Air()->getId())
       sample.limit[newTile] -= nSym;
     setTileWithSym(sample, x, y, z, newTile);
     evaluator.run(sample.state, sample.value);
@@ -190,7 +190,7 @@ namespace Fission {
     for (int i{}; i < children.size(); ++i) {
       auto &child(children[i]);
       child.state = parent.state;
-      std::copy(parent.limit, parent.limit + Air, child.limit);
+      std::copy(parent.limit, parent.limit + Evaluator::Air()->getId(), child.limit);
       mutateAndEvaluate(child, xDist(rng), yDist(rng), zDist(rng));
       double fitness(currentFitness(child));
       if (!i || fitness > bestFitness) {
@@ -218,7 +218,7 @@ namespace Fission {
     ++nIteration;
     if (bestChangedLocal) {
       for (auto &[x, y, z] : best.value.invalidTiles)
-        best.state(x, y, z) = Air;
+        best.state(x, y, z) = Evaluator::Air()->getId();
       bestChanged = true;
     }
   }
