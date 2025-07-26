@@ -14,6 +14,7 @@ import "https://code.jquery.com/jquery-3.5.0.slim.min.js"
 import "./FissionOpt.js";
 import {Int16, Int32, write} from "https://cdn.jsdelivr.net/npm/nbtify@2.2.0/+esm";
 
+
 function createBlockTypeTable() {
   const table = $('<table></table>');
   [
@@ -58,21 +59,13 @@ function saveTile(tile) {
   return COMPONENTS[tile].saveName
 }
 
-function formatInfo(label, value, unit) {
-  const row = $('<div></div>').addClass('info');
-  row.append('<div>' + label + '</div>');
-  row.append('<div>' + unit + '</div>');
-  row.append(Math.round(value * 100) / 100);
-  return row
-}
-
 $(() => { FissionOpt().then((FissionOpt) => {
   createBlockTypeTable()
   const run = $('#run'), pause = $('#pause'), stop = $('#stop'), design = $('#design');
   const save = $('#save'), bgString = $('#bgString'), progress = $('#progress');
   const fuelBasePower = $('#fuelBasePower'), fuelBaseHeat = $('#fuelBaseHeat');
   const settings = new FissionOpt.FissionSettings();
-  let lossElement, lossPlot, opt = null, timeout = null;
+  let lossElement, lossPlot, opt = null, timeout = null, modifier = 1;
 
   const fuelPresets = {
     TBU: [60*80, 18],
@@ -133,8 +126,8 @@ $(() => { FissionOpt().then((FissionOpt) => {
     let block = $('<div></div>');
     block.append(formatInfo('Max Power', sample.getPower(), 'FE/t'));
     block.append(formatInfo('Avg Power', sample.getAvgPower(), 'FE/t'));
-    block.append(formatInfo('Max Power (GT)', sample.getPower() / 8192, 'A (EV)'));
-    block.append(formatInfo('Avg Power (GT)', sample.getAvgPower() / 8192, 'A (EV)'));
+    block.append(formatInfoGT('Max Power (GT)', sample.getPower() / 8192));
+    block.append(formatInfoGT('Avg Power (GT)', sample.getAvgPower() / 8192));
     block.append(formatInfo('Heat', sample.getHeat(), 'H/t'));
     block.append(formatInfo('Cooling', sample.getCooling(), 'H/t'));
     block.append(formatInfo('Net Heat', sample.getNetHeat(), 'H/t'));
@@ -248,6 +241,31 @@ $(() => { FissionOpt().then((FissionOpt) => {
       block.append(row.append(' &times; ' + resource[1]));
     }
     design.append(block);
+  }
+  function formatInfo(label, value, unit) {
+    const row = $('<div></div>').addClass('info');
+    row.append('<div>' + label + '</div>');
+    row.append('<div>' + unit + '</div>');
+    row.append(Math.round(value * 100) / 100);
+    return row
+  }
+
+  function formatInfoGT(label, value) {
+    const row = $('<div></div>').addClass('info');
+    row.append('<div>' + label + '</div>');
+    const select = $(
+        `<select id="selectGT">
+        <option value="1" ${modifier === 1 ? 'selected' : ''}>A (EV)</option>
+        <option value="4" ${modifier === 4 ? 'selected' : ''}>A (IV)</option>
+        <option value="16" ${modifier === 16 ? 'selected' : ''}>A (LuV)</option>
+      </select>`)
+    select.change(() => {
+      modifier = parseInt(select.val());
+      displaySample(opt.getBest());
+    })
+    row.append(select);
+    row.append(Math.round(value * 100) / 100 / modifier);
+    return row
   }
 
   function step() {
