@@ -4,7 +4,7 @@ build/
 # Output files generated in our source tree
 web/FissionOpt.js
 web/FissionOpt.wasm
-web/config/
+web/**/*.json
 
 .vscode/
 .idea/

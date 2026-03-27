@@ -5,62 +5,72 @@
  * @property {number} cooling_rate
  */
 
-/** @type {Component[]} */
-import COMPONENTS from "./components.json" with {type: "json"};
 import "https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"
 import "https://code.jquery.com/jquery-3.5.0.slim.min.js"
 import "./FissionOpt.js";
 import {Int16, Int32, write} from "https://cdn.jsdelivr.net/npm/nbtify@2.2.0/+esm";
 
-const CELL_ID = COMPONENTS.length - 3;
-const MODERATOR_ID = COMPONENTS.length - 2;
-const AIR_ID = COMPONENTS.length - 1;
-const N_HEATSINKS = CELL_ID;
+/** @type {Component[]} */
+let COMPONENTS = [];
+let CELL_ID = -1;
+let MODERATOR_ID = -1;
+let AIR_ID = -1;
+let N_HEATSINKS = 0;
 
-async function fetchJsonFromCandidates(paths) {
-  for (const path of paths) {
-    try {
-      const response = await fetch(path);
-      if (response.ok)
-        return await response.json();
-    } catch {
-      // Try next candidate location.
-    }
+async function fetchJson(path) {
+  try {
+    const response = await fetch(path);
+    if (response.ok)
+      return await response.json();
+  } catch {
+    // Ignore fetch error and return null.
   }
   return null;
 }
 
-async function loadFuelConfigFileNames() {
-  const manifest = await fetchJsonFromCandidates([
-    "./config/fission_fuel/files.json",
-    "../config/fission_fuel/files.json"
-  ]);
-  if (!Array.isArray(manifest))
-    return [];
-  return manifest.filter((x) => typeof x === "string" && x.endsWith(".json"));
-}
-
 async function loadFuelPresetsFromConfig() {
   const presets = {};
-  const files = await loadFuelConfigFileNames();
-  for (const file of files) {
-    const data = await fetchJsonFromCandidates([
-      `./config/fission_fuel/${file}`,
-      `../config/fission_fuel/${file}`
-    ]);
-    if (!Array.isArray(data))
+  /** @type {{name: string, forge_energy: number, heat: number}[]} */
+  const data = await fetchJson("./fission_fuel.json");
+  for (const fuel of data) {
+    if (!fuel || typeof fuel.name !== "string")
       continue;
-    for (const fuel of data) {
-      if (!fuel || typeof fuel.name !== "string")
-        continue;
-      const key = fuel.name.replaceAll("-", "").toUpperCase();
-      const energy = Number(fuel.forge_energy);
-      const heat = Number(fuel.heat);
-      if (Number.isFinite(energy) && Number.isFinite(heat))
-        presets[key] = [energy, heat];
-    }
+    const key = fuel.name.replaceAll("-", "").toUpperCase();
+    const energy = Number(fuel.forge_energy);
+    const heat = Number(fuel.heat);
+    if (Number.isFinite(energy) && Number.isFinite(heat))
+      presets[key] = [energy, heat];
   }
   return presets;
+}
+
+async function loadReactorComponents() {
+  const heatSinks = await fetchJson("./heat_sinks.json");
+  const metadata = await fetchJson("./metadata.json");
+
+  const sinksByType = {};
+  for (const sink of heatSinks) {
+    if (!sink || typeof sink.type !== "string")
+      continue;
+    sinksByType[sink.type] = sink;
+  }
+
+  const components = [];
+  for (const meta of metadata) {
+    if (!meta || typeof meta.type !== "string")
+      continue;
+    const sink = sinksByType[meta.type];
+    const coolingRate = sink ? Number(sink.heat) : undefined;
+    components.push({
+      title: meta.fullName,
+      name: meta.shortName || meta.className,
+      className: meta.className,
+      saveName: meta.blockName,
+      cooling_rate: Number.isFinite(coolingRate) ? coolingRate : undefined
+    });
+  }
+
+  return components;
 }
 
 function createBlockTypeTable() {
@@ -91,6 +101,11 @@ function saveTile(tile) {
 }
 
 $(() => { FissionOpt().then(async (FissionOpt) => {
+  COMPONENTS = await loadReactorComponents();
+  CELL_ID = COMPONENTS.length - 3;
+  MODERATOR_ID = COMPONENTS.length - 2;
+  AIR_ID = COMPONENTS.length - 1;
+  N_HEATSINKS = CELL_ID;
   createBlockTypeTable()
   const run = $('#run'), pause = $('#pause'), stop = $('#stop'), design = $('#design');
   const save = $('#save'), bgString = $('#bgString'), progress = $('#progress');
