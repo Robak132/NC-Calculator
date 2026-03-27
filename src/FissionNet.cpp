@@ -2,6 +2,10 @@
 #include "FissionNet.h"
 
 namespace Fission {
+  namespace {
+    constexpr int Air = static_cast<int>(Tile::Air);
+  }
+
   Net::Net(Opt &opt) :opt(opt), mCorrector(1), rCorrector(1), trajectoryLength(), writePos() {
     for (int i{}; i < Air; ++i)
       if (opt.settings.limit[i])

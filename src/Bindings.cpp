@@ -10,6 +10,14 @@ static void setRate(Fission::Settings &x, int index, double rate) {
   x.coolingRates[index] = rate;
 }
 
+static int getGoal(const Fission::Settings &x) {
+  return static_cast<int>(x.goal);
+}
+
+static void setGoal(Fission::Settings &x, int goal) {
+  x.goal = static_cast<Fission::Goal>(goal);
+}
+
 static emscripten::val getData(const Fission::Sample &x) {
   return emscripten::val(emscripten::typed_memory_view(x.state.size(), x.state.data()));
 }
@@ -70,7 +78,7 @@ EMSCRIPTEN_BINDINGS(FissionOpt) {
     .function("setLimit", &setLimit)
     .function("setRate", &setRate)
     .property("ensureHeatNeutral", &Fission::Settings::ensureHeatNeutral)
-    .property("goal", &Fission::Settings::goal)
+    .property("goal", &getGoal, &setGoal)
     .property("symX", &Fission::Settings::symX)
     .property("symY", &Fission::Settings::symY)
     .property("symZ", &Fission::Settings::symZ)

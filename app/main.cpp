@@ -99,37 +99,37 @@ class FissionApp {
     }
   }
 
-  static int parseGoal(const std::string &goal) {
-    if (goal == "power")
-      return Fission::GoalPower;
-    if (goal == "breeder")
-      return Fission::GoalBreeder;
-    if (goal == "efficiency")
-      return Fission::GoalEfficiency;
-    throw std::runtime_error("Unsupported goal: " + goal + " (expected power, breeder or efficiency)");
-  }
-
-  static void initCoolingRates(Fission::Settings &settings) {
-    for (int i = 0; i < Fission::Air; ++i) {
-      settings.limit[i] = -1;
-      settings.coolingRates[i] = 0.0;
+    static Fission::Goal parseGoal(const std::string &goal) {
+      if (goal == "power")
+        return Fission::Goal::Power;
+      if (goal == "breeder")
+        return Fission::Goal::Breeder;
+      if (goal == "efficiency")
+        return Fission::Goal::Efficiency;
+      throw std::runtime_error("Unsupported goal: " + goal + " (expected power, breeder or efficiency)");
     }
-    settings.coolingRates[Fission::Water] = 60;
-    settings.coolingRates[Fission::Copper] = 80;
-    settings.coolingRates[Fission::Cryotheum] = 200;
-    settings.coolingRates[Fission::Enderium] = 120;
-    settings.coolingRates[Fission::Redstone] = 90;
-    settings.coolingRates[Fission::Helium] = 140;
-    settings.coolingRates[Fission::Boron] = 160;
-    settings.coolingRates[Fission::Lapis] = 120;
-    settings.coolingRates[Fission::Emerald] = 160;
-    settings.coolingRates[Fission::Quartz] = 90;
-    settings.coolingRates[Fission::Tin] = 120;
-    settings.coolingRates[Fission::Aluminium] = 175;
-    settings.coolingRates[Fission::Magnesium] = 110;
-    settings.coolingRates[Fission::Manganese] = 150;
-    settings.coolingRates[Fission::Glowstone] = 130;
-  }
+
+    static void initCoolingRates(Fission::Settings &settings) {
+      for (int i = 0; i < Fission::TileCount; ++i) {
+        settings.limit[i] = -1;
+        settings.coolingRates[i] = 0.0;
+      }
+      settings.coolingRates[static_cast<int>(Fission::Tile::Water)] = 60;
+      settings.coolingRates[static_cast<int>(Fission::Tile::Copper)] = 80;
+      settings.coolingRates[static_cast<int>(Fission::Tile::Cryotheum)] = 200;
+      settings.coolingRates[static_cast<int>(Fission::Tile::Enderium)] = 120;
+      settings.coolingRates[static_cast<int>(Fission::Tile::Redstone)] = 90;
+      settings.coolingRates[static_cast<int>(Fission::Tile::Helium)] = 140;
+      settings.coolingRates[static_cast<int>(Fission::Tile::Boron)] = 160;
+      settings.coolingRates[static_cast<int>(Fission::Tile::Lapis)] = 120;
+      settings.coolingRates[static_cast<int>(Fission::Tile::Emerald)] = 160;
+      settings.coolingRates[static_cast<int>(Fission::Tile::Quartz)] = 90;
+      settings.coolingRates[static_cast<int>(Fission::Tile::Tin)] = 120;
+      settings.coolingRates[static_cast<int>(Fission::Tile::Aluminium)] = 175;
+      settings.coolingRates[static_cast<int>(Fission::Tile::Magnesium)] = 110;
+      settings.coolingRates[static_cast<int>(Fission::Tile::Manganese)] = 150;
+      settings.coolingRates[static_cast<int>(Fission::Tile::Glowstone)] = 130;
+    }
 
   static void printSummary(const Fission::Sample &best) {
     std::cout << "\nBest result:\n";

@@ -1,11 +1,12 @@
 #ifndef _FISSION_H_
 #define _FISSION_H_
+#include <array>
 #include <xtensor/xtensor.hpp>
 
 namespace Fission {
   using Coords = std::vector<std::tuple<int, int, int>>;
 
-  enum {
+  enum class Tile : int {
     // Cooler
     Water, Copper, Cryotheum, Enderium, Redstone, Helium, Boron, Lapis,
     Emerald, Quartz, Tin, Aluminium, Magnesium, Manganese, Glowstone,
@@ -13,19 +14,22 @@ namespace Fission {
     Cell, Moderator, Air
   };
 
-  enum {
-    GoalPower,
-    GoalBreeder,
-    GoalEfficiency
+  enum class Goal : int {
+    Power,
+    Breeder,
+    Efficiency
   };
+
+  constexpr int TileCount = static_cast<int>(Tile::Air);
+  constexpr int CoolerCount = static_cast<int>(Tile::Cell);
 
   struct Settings {
     int sizeX, sizeY, sizeZ;
     double fuelBasePower, fuelBaseHeat;
-    int limit[Air];
-    double coolingRates[Cell];
+    std::array<int, TileCount> limit;
+    std::array<double, CoolerCount> coolingRates;
     bool ensureHeatNeutral;
-    int goal;
+    Goal goal;
     bool symX, symY, symZ;
     double genMult, heatMult, modFEMult, modHeatMult, FEGenMult;
   };
@@ -49,6 +53,13 @@ namespace Fission {
     xt::xtensor<bool, 3> isActive, isModeratorInLine, visited;
     const xt::xtensor<int, 3> *state;
     
+    void reset(Evaluation &result);
+    void initializeRulesAndCellMetrics(Evaluation &result);
+    void applyPrimaryActivationRules(Evaluation &result);
+    void applySecondaryActivationRules();
+    void applyTertiaryActivationRules();
+    void accumulateCoolingAndInvalidTiles(Evaluation &result) const;
+
     int getTileSafe(int x, int y, int z) const;
     bool hasCellInLine(int x, int y, int z, int dx, int dy, int dz);
     int countAdjFuelCells(int x, int y, int z);
@@ -58,7 +69,7 @@ namespace Fission {
     int countNeighbors(int tile, int x, int y, int z) const;
     int countCasingNeighbors(int x, int y, int z) const;
   public:
-    Evaluator(const Settings &settings);
+    explicit Evaluator(const Settings &settings);
     void run(const xt::xtensor<int, 3> &currentState, Evaluation &result);
   };
 }

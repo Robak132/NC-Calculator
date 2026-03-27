@@ -5,10 +5,16 @@
 #include "FissionNet.h"
 
 namespace Fission {
+  namespace {
+    constexpr int Air = static_cast<int>(Tile::Air);
+    constexpr int StageTrain = static_cast<int>(Stage::Train);
+    constexpr int StageInfer = static_cast<int>(Stage::Infer);
+  }
+
   void Opt::restart() {
     std::shuffle(allowedCoords.begin(), allowedCoords.end(), rng);
-    std::copy(settings.limit, settings.limit + Air, parent.limit);
-    parent.state = xt::broadcast<int>(Air,
+    std::copy(settings.limit.begin(), settings.limit.end(), parent.limit.begin());
+    parent.state = xt::broadcast(Air,
       {settings.sizeX, settings.sizeY, settings.sizeZ});
     for (auto const &[x, y, z] : allowedCoords) {
       int nSym(getNSym(x, y, z));
@@ -42,7 +48,7 @@ namespace Fission {
     }
     parentFitness = currentFitness(parent);
 
-    best.state = xt::broadcast<int>(Air,
+    best.state = xt::broadcast(Air,
       {settings.sizeX, settings.sizeY, settings.sizeZ});
     evaluator.run(best.state, best.value);
   }
@@ -57,9 +63,9 @@ namespace Fission {
     switch (settings.goal) {
       default:
         return x.avgPower;
-      case GoalBreeder:
+      case Goal::Breeder:
         return x.avgBreed;
-      case GoalEfficiency:
+      case Goal::Efficiency:
         return settings.ensureHeatNeutral ? (x.efficiency - 1) * x.dutyCycle : x.efficiency - 1;
     }
   }
@@ -192,7 +198,7 @@ namespace Fission {
     for (int i{}; i < children.size(); ++i) {
       auto &child(children[i]);
       child.state = parent.state;
-      std::copy(parent.limit, parent.limit + Air, child.limit);
+      std::copy(parent.limit.begin(), parent.limit.end(), child.limit.begin());
       mutateAndEvaluate(child, xDist(rng), yDist(rng), zDist(rng));
       double fitness(currentFitness(child));
       if (!i || fitness > bestFitness) {

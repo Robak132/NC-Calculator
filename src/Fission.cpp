@@ -3,6 +3,26 @@
 #include "Fission.h"
 
 namespace Fission {
+  namespace {
+    constexpr int Water = static_cast<int>(Tile::Water);
+    constexpr int Copper = static_cast<int>(Tile::Copper);
+    constexpr int Cryotheum = static_cast<int>(Tile::Cryotheum);
+    constexpr int Enderium = static_cast<int>(Tile::Enderium);
+    constexpr int Redstone = static_cast<int>(Tile::Redstone);
+    constexpr int Helium = static_cast<int>(Tile::Helium);
+    constexpr int Boron = static_cast<int>(Tile::Boron);
+    constexpr int Lapis = static_cast<int>(Tile::Lapis);
+    constexpr int Emerald = static_cast<int>(Tile::Emerald);
+    constexpr int Quartz = static_cast<int>(Tile::Quartz);
+    constexpr int Tin = static_cast<int>(Tile::Tin);
+    constexpr int Aluminium = static_cast<int>(Tile::Aluminium);
+    constexpr int Magnesium = static_cast<int>(Tile::Magnesium);
+    constexpr int Manganese = static_cast<int>(Tile::Manganese);
+    constexpr int Glowstone = static_cast<int>(Tile::Glowstone);
+    constexpr int Cell = static_cast<int>(Tile::Cell);
+    constexpr int Moderator = static_cast<int>(Tile::Moderator);
+  }
+
   void Evaluation::compute(const Settings &settings) {
     const double moderatorsFE = moderatorCellMultiplier * settings.modFEMult / 100.0;
     const double moderatorsHeat = moderatorCellMultiplier * settings.modHeatMult / 100.0;
@@ -110,7 +130,7 @@ namespace Fission {
       + !state->in_bounds(x, y, z + 1);
   }
 
-  void Evaluator::run(const xt::xtensor<int, 3> &currentState, Evaluation &result) {
+  void Evaluator::reset(Evaluation &result) {
     result.invalidTiles.clear();
     result.cellsHeatMult = 0;
     result.cellsEnergyMult = 0;
@@ -120,7 +140,9 @@ namespace Fission {
     result.breed = 0; // Number of Cells
     isActive.fill(false);
     isModeratorInLine.fill(false);
-    this->state = &currentState;
+  }
+
+  void Evaluator::initializeRulesAndCellMetrics(Evaluation &result) {
     for (int x{}; x < settings.sizeX; ++x) {
       for (int y{}; y < settings.sizeY; ++y) {
         for (int z{}; z < settings.sizeZ; ++z) {
@@ -143,7 +165,9 @@ namespace Fission {
         }
       }
     }
+  }
 
+  void Evaluator::applyPrimaryActivationRules(Evaluation &result) {
     for (int x{}; x < settings.sizeX; ++x) {
       for (int y{}; y < settings.sizeY; ++y) {
         for (int z{}; z < settings.sizeZ; ++z) {
@@ -176,7 +200,9 @@ namespace Fission {
         }
       }
     }
-    
+  }
+
+  void Evaluator::applySecondaryActivationRules() {
     for (int x{}; x < settings.sizeX; ++x) {
       for (int y{}; y < settings.sizeY; ++y) {
         for (int z{}; z < settings.sizeZ; ++z) {
@@ -214,7 +240,9 @@ namespace Fission {
         }
       }
     }
-    
+  }
+
+  void Evaluator::applyTertiaryActivationRules() {
     for (int x{}; x < settings.sizeX; ++x) {
       for (int y{}; y < settings.sizeY; ++y) {
         for (int z{}; z < settings.sizeZ; ++z) {
@@ -234,7 +262,9 @@ namespace Fission {
         }
       }
     }
+  }
 
+  void Evaluator::accumulateCoolingAndInvalidTiles(Evaluation &result) const {
     for (int x{}; x < settings.sizeX; ++x) {
       for (int y{}; y < settings.sizeY; ++y) {
         for (int z{}; z < settings.sizeZ; ++z) {
@@ -248,6 +278,16 @@ namespace Fission {
         }
       }
     }
+  }
+
+  void Evaluator::run(const xt::xtensor<int, 3> &currentState, Evaluation &result) {
+    this->state = &currentState;
+    reset(result);
+    initializeRulesAndCellMetrics(result);
+    applyPrimaryActivationRules(result);
+    applySecondaryActivationRules();
+    applyTertiaryActivationRules();
+    accumulateCoolingAndInvalidTiles(result);
 
     result.compute(settings);
   }

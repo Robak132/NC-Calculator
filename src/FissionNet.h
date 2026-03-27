@@ -28,7 +28,7 @@ namespace Fission {
 
     xt::xtensor<double, 1> extractFeatures(const Sample &sample);
   public:
-    Net(Opt &opt);
+    explicit Net(Opt &opt);
     double infer(const Sample &sample);
     void newTrajectory() { trajectoryLength = 0; }
     void appendTrajectory(const Sample &sample);

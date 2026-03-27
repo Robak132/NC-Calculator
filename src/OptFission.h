@@ -6,14 +6,14 @@
 
 namespace Fission {
   struct Sample {
-    int limit[Air];
+    std::array<int, TileCount> limit;
     xt::xtensor<int, 3> state;
     Evaluation value;
   };
 
-  enum {
-    StageTrain = -2,
-    StageInfer
+  enum class Stage : int {
+    Train = -2,
+    Infer
   };
 
   constexpr int interactiveMin(1024), interactiveScale(327680), interactiveNet(16), nLossHistory(256);
