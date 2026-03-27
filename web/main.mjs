@@ -3,8 +3,6 @@
  * @property {string} name
  * @property {string} className
  * @property {number} cooling_rate
- * @property {number} active_cooling_rate
- * @property {number} id
  */
 
 /** @type {Component[]} */
@@ -14,15 +12,17 @@ import "https://code.jquery.com/jquery-3.5.0.slim.min.js"
 import "./FissionOpt.js";
 import {Int16, Int32, write} from "https://cdn.jsdelivr.net/npm/nbtify@2.2.0/+esm";
 
+const CELL_ID = COMPONENTS.length - 3;
+const MODERATOR_ID = COMPONENTS.length - 2;
+const AIR_ID = COMPONENTS.length - 1;
+const N_HEATSINKS = CELL_ID;
 
 function createBlockTypeTable() {
   const table = $('<table></table>');
   [
     { id: "blockType", label: 'Block Type', getValue: bt => `<th title="${bt.title}" class="${bt.className}">${bt.name}</th>` },
     { id: "rate", label: 'Cooling Rate (H/t)', getValue: bt => bt.cooling_rate ? `<td><input value="${bt.cooling_rate}"></td>` : `<td>&mdash;</td>` },
-    { id: "limit", label: 'Max Allowed', getValue: () => '<td><input type="text"></td>' },
-    { id: "activeRate", label: 'Active Cooling Rate (H/t)', getValue: bt => bt.active_cooling_rate ? `<td><input type="text" value="${bt.active_cooling_rate}"></td>` : `<td>&mdash;</td>` },
-    { id: "activeLimit", label: 'Max Active Allowed', getValue: bt => bt.active_cooling_rate ? '<td><input type="text" value="0"></td>' : `<td>&mdash;</td>` }
+    { id: "limit", label: 'Max Allowed', getValue: () => '<td><input type="text"></td>' }
   ].forEach(rowDef => {
     const row = $(`<tr id="${rowDef.id}"></tr>`);
     row.append(`<th>${rowDef.label}</th>`);
@@ -33,30 +33,15 @@ function createBlockTypeTable() {
 }
 
 function displayTile(tile) {
-  let active = false;
-  if (tile >= COMPONENTS.length - 3) {
-    tile -= COMPONENTS.length - 3;
-    if (tile < COMPONENTS.length - 3)
-      active = true;
-  }
-  const result = $('<span>' + COMPONENTS[tile].name + '</span>').addClass(COMPONENTS[tile].className);
-  if (active) {
-    result.attr('title', `Active ${COMPONENTS[tile].title}`);
-    result.css('outline', '2px dashed black')
-  } else {
-    result.attr('title', COMPONENTS[tile].title);
-  }
+  const component = COMPONENTS[tile] || COMPONENTS[AIR_ID];
+  const result = $('<span>' + component.name + '</span>').addClass(component.className);
+  result.attr('title', component.title);
   return result;
 }
 
 function saveTile(tile) {
-  if (tile >= COMPONENTS.length - 3) {
-    tile -= COMPONENTS.length - 3;
-    if (tile < COMPONENTS.length - 3) {
-      return COMPONENTS[tile].saveName.replaceAll("nuclearcraft:", "nuclearcraft:active_");
-    }
-  }
-  return COMPONENTS[tile].saveName
+  const component = COMPONENTS[tile] || COMPONENTS[AIR_ID];
+  return component.saveName;
 }
 
 $(() => { FissionOpt().then((FissionOpt) => {
@@ -65,34 +50,22 @@ $(() => { FissionOpt().then((FissionOpt) => {
   const save = $('#save'), bgString = $('#bgString'), progress = $('#progress');
   const fuelBasePower = $('#fuelBasePower'), fuelBaseHeat = $('#fuelBaseHeat');
   const settings = new FissionOpt.FissionSettings();
-  let lossElement, lossPlot, opt = null, timeout = null, modifier = 1;
+  let lossElement, lossPlot, opt = null, timeout = null;
 
   const fuelPresets = {
-    TBU: [60*80, 18],
-    LEU235: [120*80, 50],
-    HEU235: [480*80, 300],
-    LEU233: [144*80, 60],
-    HEU233: [576*80, 360],
-    LEN236: [90*80, 36],
-    HEN236: [360*80, 216],
-    LEP239: [105*80, 40],
-    HEP239: [420*80, 240],
-    LEP241: [165*80, 70],
-    HEP241: [660*80, 420],
-    LEA242: [192*80, 94],
-    HEA242: [768*80, 564],
-    LECm243: [210*80, 112],
-    HECm243: [840*80, 672],
-    LECm245: [162*80, 68],
-    HECm245: [648*80, 408],
-    LECm247: [138*80, 54],
-    HECm247: [552*80, 324],
-    LEB248: [135*80, 52],
-    HEB248: [540*80, 312],
-    LECf249: [216*80, 116],
-    HECf249: [864*80, 696],
-    LECf251: [225*80, 120],
-    HECf251: [900*80, 720],
+    TBU: [4800, 27],
+    LEU235: [12960, 50],
+    LEU233: [17280, 60],
+    HEU235: [51840, 150],
+    HEU233: [69120, 180],
+    LEN236: [7200, 36],
+    HEN236: [28800, 108],
+    LEP239: [9600, 40],
+    LEP241: [23520, 70],
+    HEP239: [38400, 210],
+    HEP241: [94080, 120],
+    LEA242: [26880, 94],
+    HEA242: [107520, 282]
   };
   for (const [name, [power, heat]] of Object.entries(fuelPresets)) {
     $('#' + name).click(() => {
@@ -105,12 +78,8 @@ $(() => { FissionOpt().then((FissionOpt) => {
 
   const rates = []
   const limits = []
-  const activeRates = []
-  const activeLimits = []
   $('#rate input').each(function() { rates.push($(this)); });
   $('#limit input').each(function() { limits.push($(this)); });
-  $('#activeRate input').each(function() { activeRates.push($(this)); });
-  $('#activeLimit input').each(function() { activeLimits.push($(this)); });
 
 
   function updateDisables() {
@@ -232,7 +201,7 @@ $(() => { FissionOpt().then((FissionOpt) => {
     resourceMap = Object.entries(resourceMap);
     resourceMap.sort((x, y) => y[1] - x[1]);
     for (let resource of resourceMap) {
-      if (parseInt(resource[0]) === (COMPONENTS.length - 3) * 2 + 2) continue;
+      if (parseInt(resource[0]) === AIR_ID) continue;
       const row = $('<div></div>');
       if (resource[0] < 0)
         row.append('Casing');
@@ -251,20 +220,20 @@ $(() => { FissionOpt().then((FissionOpt) => {
   }
 
   function formatInfoGT(label, value) {
+    const tiers = [
+      {name: 'EV', divisor: 1},
+      {name: 'IV', divisor: 4},
+      {name: 'LuV', divisor: 16}
+    ];
+    let tier = 0;
+    while (tier + 1 < tiers.length && value / tiers[tier + 1].divisor >= 16) {
+      ++tier;
+    }
+    const shown = value / tiers[tier].divisor;
     const row = $('<div></div>').addClass('info');
     row.append('<div>' + label + '</div>');
-    const select = $(
-        `<select id="selectGT">
-        <option value="1" ${modifier === 1 ? 'selected' : ''}>A (EV)</option>
-        <option value="4" ${modifier === 4 ? 'selected' : ''}>A (IV)</option>
-        <option value="16" ${modifier === 16 ? 'selected' : ''}>A (LuV)</option>
-      </select>`)
-    select.change(() => {
-      modifier = parseInt(select.val());
-      displaySample(opt.getBest());
-    })
-    row.append(select);
-    row.append(Math.round(value * 100) / 100 / modifier);
+    row.append('<div>A (' + tiers[tier].name + ')</div>');
+    row.append(Math.round(shown * 100) / 100);
     return row
   }
 
@@ -329,24 +298,24 @@ $(() => { FissionOpt().then((FissionOpt) => {
         settings.modFEMult = parsePositiveFloat('Moderator FE Multiplier', $('#modFEMult').val());
         settings.modHeatMult = parsePositiveFloat('Moderator Heat Multiplier', $('#modHeatMult').val());
         settings.FEGenMult = parsePositiveFloat('FE Generation Multiplier', $('#FEGenMult').val());
-        settings.activeComponentPrime = $('#activeComponentPrime').is(':checked');
 
-        let index = 0
-        for (let i = 0; i < COMPONENTS.length - 3; i++){
-          settings.setLimit(index, parseLimits(limits[i].val()))
-          settings.setRate(index, parsePositiveFloat('Cooling Rate', rates[i].val()));
-          index++;
+        for (let i = 0; i < N_HEATSINKS; ++i) {
+          settings.setLimit(i, 0);
+          settings.setRate(i, 0);
         }
-        for (let i = 0; i < COMPONENTS.length; i++) {
-          let value = COMPONENTS[i];
-          if (value.active_cooling_rate) {
-            settings.setLimit(index, parseLimits(activeLimits[i].val()))
-            settings.setRate(index, parsePositiveFloat('Cooling Rate', activeRates[i].val()));
+
+        let rateIndex = 0;
+        for (let i = 0; i < COMPONENTS.length; ++i) {
+          const component = COMPONENTS[i];
+          const limit = parseLimits(limits[i].val());
+          if (component.cooling_rate) {
+            settings.setLimit(i, limit);
+            settings.setRate(i, parsePositiveFloat('Cooling Rate', rates[rateIndex].val()));
+            ++rateIndex;
+          } else if (i === CELL_ID || i === MODERATOR_ID) {
+            settings.setLimit(i, limit);
           }
-          index++;
         }
-        settings.setLimit((COMPONENTS.length - 3) * 2, parseLimits(limits[COMPONENTS.length - 3].val())) // Cells
-        settings.setLimit((COMPONENTS.length - 3) * 2 + 1 , parseLimits(limits[COMPONENTS.length - 2].val())) // Moderators
       } catch (error) {
         alert('Error: ' + error.message);
         return;

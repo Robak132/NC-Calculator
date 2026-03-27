@@ -78,8 +78,7 @@ EMSCRIPTEN_BINDINGS(FissionOpt) {
     .property("heatMult", &Fission::Settings::heatMult)
     .property("modFEMult", &Fission::Settings::modFEMult)
     .property("modHeatMult", &Fission::Settings::modHeatMult)
-    .property("FEGenMult", &Fission::Settings::FEGenMult)
-    .property("activeHeatsinkPrime", &Fission::Settings::activeHeatsinkPrime);
+    .property("FEGenMult", &Fission::Settings::FEGenMult);
   emscripten::class_<Fission::Sample>("FissionSample")
     .function("getData", &getData)
     .function("getShape", &getShape)

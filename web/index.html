@@ -37,9 +37,6 @@
             <td>Neptunium (Np)</td>
             <td>Plutonium (Pu)</td>
             <td>Americium (Am)</td>
-            <td>Curium (Cm)</td>
-            <td>Berkelium (Bk)</td>
-            <td>Californium (Cf)</td>
           </tr>
           <tr>
             <td><a href="javascript:" id="TBU">TBU</a></td>
@@ -55,25 +52,13 @@
               <a href="javascript:" id="HEP241">HEP-241</a></td>
             <td><a href="javascript:" id="LEA242">LEA-242</a><br>
               <a href="javascript:" id="HEA242">HEA-242</a>
-            <td><a href="javascript:" id="LECm243">LECm-243</a><br>
-              <a href="javascript:" id="LECm245">LECm-245</a><br>
-              <a href="javascript:" id="LECm247">LECm-247</a><br>
-              <a href="javascript:" id="HECm243">HECm-243</a><br>
-              <a href="javascript:" id="HECm245">HECm-245</a><br>
-              <a href="javascript:" id="HECm247">HECm-247</a></td>
-            <td><a href="javascript:" id="LEB248">LEB-248</a><br>
-              <a href="javascript:" id="HEB248">HEB-248</a></td>
-            <td><a href="javascript:" id="LECf249">LECf-249</a><br>
-              <a href="javascript:" id="HECf249">HECf-249</a><br>
-              <a href="javascript:" id="LECf251">LECf-251</a><br>
-              <a href="javascript:" id="HECf251">HECf-251</a></td>
           </tr>
         </table></div>
       </div>
       <div>
         <b>Step 3</b>: If you want to limit the usage of a type of block, enter the maximum number allowed in the table below.
         Enter zero to completely disable that block. You can hover over the acronym to see the full name of each block.
-        Active coolers are disabled by default. You can enable them by removing the zeros. <b><i>NOTE: Irradiators are not supported.</i></b>
+        <b><i>NOTE: Irradiators are not supported.</i></b>
       </div>
       <div class="tables"></div>
       <div class="configs">
@@ -84,7 +69,6 @@
         <div>Moderator FE Multiplier: <input type="text" id="modFEMult" value="16.67"></div>
         <div>Moderator Heat Multiplier: <input type="text" id="modHeatMult" value="33.34"></div>
         <div>FE Generation Multiplier: <input type="text" id="FEGenMult" value="5"></div>
-        <label><input type="checkbox" id="activeHeatsinkPrime" checked>Active Heatsink Prime</label>
       </div>
       <div>
         <b>Step 5</b>: Adjust the options below and click &ldquo;Run&rdquo; to start the optimization.<br>
@@ -92,9 +76,9 @@
         <label><input type="radio" name="goal" value="0" checked>Optimize for power.</label><br>
         <label><input type="radio" name="goal" value="1">Optimize for breeding (maximize fuel consumption rate).</label><br>
         <label><input type="radio" name="goal" value="2">Optimize for efficiency.</label><br>
-        <label><input type="checkbox" id="symZ" checked>X symmetry</label>
-        <label><input type="checkbox" id="symX" checked>Y symmetry</label>
-        <label><input type="checkbox" id="symY" checked>Z symmetry</label><br>
+        <label><input type="checkbox" id="symZ" checked>Z symmetry</label>
+        <label><input type="checkbox" id="symX" checked>X symmetry</label>
+        <label><input type="checkbox" id="symY" checked>Y symmetry</label><br>
         <label><input type="checkbox" id="useNet" checked>Use reinforcement learning (requires more memory, slightly slower but can produce better design)</label><br>
         The most efficient reactor doesn't produce the most power. To get an efficient reactor that can still generate lots of power,
         you should optimize for power while limiting the cell count using the &ldquo;Max Allowed&rdquo; box for <span class="row cell" title="Reactor Cell">[]</span>.

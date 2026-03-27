@@ -70,7 +70,7 @@ namespace Fission {
   int Evaluator::isActiveSafe(int tile, int x, int y, int z) const {
     if (!state->in_bounds(x, y, z))
       return false;
-    return (*state)(x, y, z) == tile && isActive(x, y, z) && (tile < Active || tile == Moderator || settings.activeHeatsinkPrime);
+    return (*state)(x, y, z) == tile && isActive(x, y, z) && (tile < Cell || tile == Moderator);
   }
 
   int Evaluator::countActiveNeighbors(int tile, int x, int y, int z) const {
@@ -132,10 +132,8 @@ namespace Fission {
             result.cellsEnergyMult += adjFuelCells + 1;
             result.moderatorCellMultiplier += countActiveNeighbors(Moderator, x, y, z) * (adjFuelCells + 1);
           } else {
-            if (tile < Active) {
+            if (tile < Cell) {
               rules(x, y, z) = tile;
-            } else if (tile < Cell) {
-              rules(x, y, z) = tile - Active;
             } else {
               rules(x, y, z) = -1;
             }
@@ -170,6 +168,7 @@ namespace Fission {
               break;
             case Manganese:
               isActive(x, y, z) = countNeighbors(Cell, x, y, z) >= 2;
+              break;
             default:
               break;
           }
@@ -211,11 +210,6 @@ namespace Fission {
             case Magnesium:
               isActive(x, y, z) = countActiveNeighbors(Moderator, x, y, z) && countCasingNeighbors(x, y, z);
               break;
-            case EndStone:
-              isActive(x, y, z) = countActiveNeighbors(Enderium, x, y, z);
-              break;
-            case Arsenic:
-              isActive(x, y, z) = countActiveNeighbors(Moderator, x, y, z) >= 3;
             default:
               break;
           }
@@ -227,27 +221,8 @@ namespace Fission {
       for (int y{}; y < settings.sizeY; ++y) {
         for (int z{}; z < settings.sizeZ; ++z) {
           switch (rules(x, y, z)) {
-            case Gold:
-              isActive(x, y, z) = countActiveNeighbors(Water, x, y, z)
-                && countActiveNeighbors(Redstone, x, y, z);
-              break;
-            case Diamond:
-              isActive(x, y, z) = countActiveNeighbors(Water, x, y, z)
-                && countActiveNeighbors(Quartz, x, y, z);
-              break;
             case Copper:
               isActive(x, y, z) = countActiveNeighbors(Glowstone, x, y, z);
-            case Prismarine:
-              isActive(x, y, z) = countActiveNeighbors(Water, x, y, z);
-              break;
-            case Obsidian:
-              isActive(x, y, z) =
-                isActiveSafe(Glowstone, x - 1, y, z) &&
-                isActiveSafe(Glowstone, x + 1, y, z) ||
-                isActiveSafe(Glowstone, x, y - 1, z) &&
-                isActiveSafe(Glowstone, x, y + 1, z) ||
-                isActiveSafe(Glowstone, x, y, z - 1) &&
-                isActiveSafe(Glowstone, x, y, z + 1);
               break;
             case Aluminium:
               isActive(x, y, z) = countActiveNeighbors(Quartz, x, y, z)
@@ -257,44 +232,6 @@ namespace Fission {
               isActive(x, y, z) = countActiveNeighbors(Quartz, x, y, z)
               && (countCasingNeighbors(x, y, z) || countActiveNeighbors(Moderator, x, y, z));
               break;
-            case Silver:
-              isActive(x, y, z) = countActiveNeighbors(Glowstone, x, y, z) >= 2
-              && countActiveNeighbors(Tin, x, y, z);
-            default:
-              break;
-          }
-        }
-      }
-    }
-
-    for (int x{}; x < settings.sizeX; ++x) {
-      for (int y{}; y < settings.sizeY; ++y) {
-        for (int z{}; z < settings.sizeZ; ++z) {
-          switch (rules(x, y, z)) {
-            case Iron:
-              isActive(x, y, z) = countActiveNeighbors(Gold, x, y, z);
-              break;
-            case Fluorite:
-              isActive(x, y, z) = countActiveNeighbors(Prismarine, x, y, z) && countActiveNeighbors(Gold, x, y, z);
-              break;
-            case NetherBrick:
-              isActive(x, y, z) = countActiveNeighbors(Obsidian, x, y, z);
-            default:
-              break;
-          }
-        }
-      }
-    }
-
-    for (int x{}; x < settings.sizeX; ++x) {
-      for (int y{}; y < settings.sizeY; ++y) {
-        for (int z{}; z < settings.sizeZ; ++z) {
-          switch (rules(x, y, z)) {
-            case Lead:
-              isActive(x, y, z) = countActiveNeighbors(Iron, x, y, z);
-              break;
-            case Purpur:
-              isActive(x, y, z) = countActiveNeighbors(Iron, x, y, z) && countCasingNeighbors(x, y, z);
             default:
               break;
           }
@@ -307,26 +244,6 @@ namespace Fission {
         for (int z{}; z < settings.sizeZ; ++z) {
           int tile((*this->state)(x, y, z));
           if (tile < Cell) {
-            switch (rules(x, y, z)) {
-              case Slime:
-                isActive(x, y, z) = countActiveNeighbors(Water, x, y, z)
-                && countActiveNeighbors(Lead, x, y, z);
-                break;
-              case Lithium:
-                isActive(x, y, z) =
-                isActiveSafe(Lead, x - 1, y, z) &&
-                isActiveSafe(Lead, x + 1, y, z) ||
-                isActiveSafe(Lead, x, y - 1, z) &&
-                isActiveSafe(Lead, x, y + 1, z) ||
-                isActiveSafe(Lead, x, y, z - 1) &&
-                isActiveSafe(Lead, x, y, z + 1);
-                break;
-              case Nitrogen:
-                isActive(x, y, z) = countActiveNeighbors(Purpur, x, y, z)
-                && countActiveNeighbors(Copper, x, y, z);
-              default:
-                break;
-            }
             if (isActive(x, y, z))
               result.cooling += settings.coolingRates[tile];
             else

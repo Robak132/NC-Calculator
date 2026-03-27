@@ -7,12 +7,10 @@ namespace Fission {
 
   enum {
     // Cooler
-    Water, Redstone, Helium, Enderium, Cryotheum, Nitrogen, Quartz, Gold,
-    Glowstone, Lapis, Diamond, Iron, Emerald, Copper, Tin, Magnesium,
-    Manganese, EndStone, Arsenic, Prismarine, Obsidian, Aluminium,
-    Boron, Silver, Fluorite, NetherBrick, Lead, Purpur, Slime, Lithium, Active,
+    Water, Copper, Cryotheum, Enderium, Redstone, Helium, Boron, Lapis,
+    Emerald, Quartz, Tin, Aluminium, Magnesium, Manganese, Glowstone,
     // Other
-    Cell = Active * 2, Moderator, Air
+    Cell, Moderator, Air
   };
 
   enum {
@@ -29,7 +27,6 @@ namespace Fission {
     bool ensureHeatNeutral;
     int goal;
     bool symX, symY, symZ;
-    bool activeHeatsinkPrime;
     double genMult, heatMult, modFEMult, modHeatMult, FEGenMult;
   };
 

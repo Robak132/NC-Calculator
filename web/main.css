@@ -56,7 +56,7 @@ input {
   font-size: 135%;
 }
 
-#rate input, #limit input, #activeRate input, #activeLimit input {
+#rate input, #limit input {
   width: 5.5ch;
 }
 
@@ -66,31 +66,15 @@ input {
 .Ed {color: teal;}
 .Cr {color: deepskyBlue;}
 .Qz {color: lightgray;}
-.Au {color: gold;}
 .Gs {color: #dc0;}
 .Lp {color: blue;}
-.Dm {color: powderblue;}
-.Fe {color: wheat;}
 .Em {color: green;}
 .Cu {color: brown;}
 .Sn {color: lightsteelblue;}
 .Mg {color: pink;}
 .Mn {color: #aaafcc;}
-.En {color: #ecf8b4;}
-.As {color: #8f9284;}
-.Pm {color: mediumaquamarine;}
-.Ob {color: indigo;}
 .Al {color: #d4f4e9;}
-.Vi {color: #9a7161;}
 .Bo {color: silver;}
-.Ag {color: mistyrose;}
-.Fl {color: #8dae99;}
-.Nr {color: maroon;}
-.Pb {color: darkslategray;}
-.Pr {color: mediumorchid;}
-.Sm {color: lightgreen;}
-.Li {color: lavender;}
-.Nt {color: #42a649;}
 .air {color: white;}
 .cell {color: gray;}
 .mod {color: black;}
