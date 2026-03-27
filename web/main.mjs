@@ -7,6 +7,7 @@
 
 /** @type {Component[]} */
 import COMPONENTS from "./components.json" with {type: "json"};
+import FUEL_PRESETS from "./fuel-presets.json" with {type: "json"};
 import "https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"
 import "https://code.jquery.com/jquery-3.5.0.slim.min.js"
 import "./FissionOpt.js";
@@ -52,22 +53,7 @@ $(() => { FissionOpt().then((FissionOpt) => {
   const settings = new FissionOpt.FissionSettings();
   let lossElement, lossPlot, opt = null, timeout = null;
 
-  const fuelPresets = {
-    TBU: [4800, 27],
-    LEU235: [12960, 50],
-    LEU233: [17280, 60],
-    HEU235: [51840, 150],
-    HEU233: [69120, 180],
-    LEN236: [7200, 36],
-    HEN236: [28800, 108],
-    LEP239: [9600, 40],
-    LEP241: [23520, 70],
-    HEP239: [38400, 210],
-    HEP241: [94080, 120],
-    LEA242: [26880, 94],
-    HEA242: [107520, 282]
-  };
-  for (const [name, [power, heat]] of Object.entries(fuelPresets)) {
+  for (const [name, [power, heat]] of Object.entries(FUEL_PRESETS)) {
     $('#' + name).click(() => {
       if (opt !== null)
         return;

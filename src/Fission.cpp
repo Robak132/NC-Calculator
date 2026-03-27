@@ -154,8 +154,7 @@ namespace Fission {
               isActive(x, y, z) = countNeighbors(Cell, x, y, z);
               break;
             case Lapis:
-              isActive(x, y, z) = countNeighbors(Cell, x, y, z)
-                && countCasingNeighbors(x, y, z);
+              isActive(x, y, z) = countNeighbors(Cell, x, y, z) && countCasingNeighbors(x, y, z);
               break;
             case Enderium:
               isActive(x, y, z) = countCasingNeighbors(x, y, z) == 3
@@ -164,7 +163,7 @@ namespace Fission {
                 && (!z || z == settings.sizeZ - 1);
               break;
             case Cryotheum:
-              isActive(x, y, z) = countNeighbors(Cell, x, y, z) >= 2;
+              isActive(x, y, z) = countNeighbors(Cell, x, y, z) >= 2 && countActiveNeighbors(Moderator, x, y, z);
               break;
             case Manganese:
               isActive(x, y, z) = countNeighbors(Cell, x, y, z) >= 2;
@@ -181,8 +180,7 @@ namespace Fission {
         for (int z{}; z < settings.sizeZ; ++z) {
           switch (rules(x, y, z)) {
             case Water:
-              isActive(x, y, z) = countNeighbors(Cell, x, y, z)
-                || countActiveNeighbors(Moderator, x, y, z);
+              isActive(x, y, z) = countNeighbors(Cell, x, y, z) || countActiveNeighbors(Moderator, x, y, z);
               break;
             case Quartz:
               isActive(x, y, z) = countActiveNeighbors(Moderator, x, y, z);
@@ -191,12 +189,10 @@ namespace Fission {
               isActive(x, y, z) = countActiveNeighbors(Moderator, x, y, z) >= 2;
               break;
             case Helium:
-              isActive(x, y, z) = countActiveNeighbors(Redstone, x, y, z) == 1
-                && countCasingNeighbors(x, y, z);
+              isActive(x, y, z) = countActiveNeighbors(Redstone, x, y, z) && countCasingNeighbors(x, y, z);
               break;
             case Emerald:
-              isActive(x, y, z) = countActiveNeighbors(Moderator, x, y, z)
-                && countNeighbors(Cell, x, y, z);
+              isActive(x, y, z) = countActiveNeighbors(Moderator, x, y, z) && countNeighbors(Cell, x, y, z);
               break;
             case Tin:
               isActive(x, y, z) =
@@ -225,12 +221,10 @@ namespace Fission {
               isActive(x, y, z) = countActiveNeighbors(Glowstone, x, y, z);
               break;
             case Aluminium:
-              isActive(x, y, z) = countActiveNeighbors(Quartz, x, y, z)
-              && countActiveNeighbors(Lapis, x, y, z);
+              isActive(x, y, z) = countActiveNeighbors(Quartz, x, y, z) && countActiveNeighbors(Lapis, x, y, z);
               break;
             case Boron:
-              isActive(x, y, z) = countActiveNeighbors(Quartz, x, y, z)
-              && (countCasingNeighbors(x, y, z) || countActiveNeighbors(Moderator, x, y, z));
+              isActive(x, y, z) = countActiveNeighbors(Quartz, x, y, z) && (countCasingNeighbors(x, y, z) || countActiveNeighbors(Moderator, x, y, z));
               break;
             default:
               break;
