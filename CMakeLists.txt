@@ -33,3 +33,15 @@ set_target_properties(FissionOpt PROPERTIES
     OUTPUT_NAME "FissionOpt"
     LINK_FLAGS "-O3 -flto -s MODULARIZE=1 -s EXPORT_NAME=FissionOpt -s ALLOW_MEMORY_GROWTH=1 --bind"
 )
+
+# Expose user-configurable fuel JSON files under web/config for runtime loading.
+add_custom_command(TARGET FissionOpt POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_SOURCE_DIR}/web/config"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_SOURCE_DIR}/config/fission_fuel"
+            "${CMAKE_SOURCE_DIR}/web/config/fission_fuel"
+    COMMAND ${CMAKE_COMMAND}
+            -DFISSION_FUEL_DIR="${CMAKE_SOURCE_DIR}/web/config/fission_fuel"
+            -DMANIFEST_OUT="${CMAKE_SOURCE_DIR}/web/config/fission_fuel/files.json"
+            -P "${CMAKE_SOURCE_DIR}/cmake/GenerateFuelManifest.cmake"
+)

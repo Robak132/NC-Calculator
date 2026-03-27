@@ -7,7 +7,6 @@
 
 /** @type {Component[]} */
 import COMPONENTS from "./components.json" with {type: "json"};
-import FUEL_PRESETS from "./fuel-presets.json" with {type: "json"};
 import "https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"
 import "https://code.jquery.com/jquery-3.5.0.slim.min.js"
 import "./FissionOpt.js";
@@ -17,6 +16,52 @@ const CELL_ID = COMPONENTS.length - 3;
 const MODERATOR_ID = COMPONENTS.length - 2;
 const AIR_ID = COMPONENTS.length - 1;
 const N_HEATSINKS = CELL_ID;
+
+async function fetchJsonFromCandidates(paths) {
+  for (const path of paths) {
+    try {
+      const response = await fetch(path);
+      if (response.ok)
+        return await response.json();
+    } catch {
+      // Try next candidate location.
+    }
+  }
+  return null;
+}
+
+async function loadFuelConfigFileNames() {
+  const manifest = await fetchJsonFromCandidates([
+    "./config/fission_fuel/files.json",
+    "../config/fission_fuel/files.json"
+  ]);
+  if (!Array.isArray(manifest))
+    return [];
+  return manifest.filter((x) => typeof x === "string" && x.endsWith(".json"));
+}
+
+async function loadFuelPresetsFromConfig() {
+  const presets = {};
+  const files = await loadFuelConfigFileNames();
+  for (const file of files) {
+    const data = await fetchJsonFromCandidates([
+      `./config/fission_fuel/${file}`,
+      `../config/fission_fuel/${file}`
+    ]);
+    if (!Array.isArray(data))
+      continue;
+    for (const fuel of data) {
+      if (!fuel || typeof fuel.name !== "string")
+        continue;
+      const key = fuel.name.replaceAll("-", "").toUpperCase();
+      const energy = Number(fuel.forge_energy);
+      const heat = Number(fuel.heat);
+      if (Number.isFinite(energy) && Number.isFinite(heat))
+        presets[key] = [energy, heat];
+    }
+  }
+  return presets;
+}
 
 function createBlockTypeTable() {
   const table = $('<table></table>');
@@ -45,7 +90,7 @@ function saveTile(tile) {
   return component.saveName;
 }
 
-$(() => { FissionOpt().then((FissionOpt) => {
+$(() => { FissionOpt().then(async (FissionOpt) => {
   createBlockTypeTable()
   const run = $('#run'), pause = $('#pause'), stop = $('#stop'), design = $('#design');
   const save = $('#save'), bgString = $('#bgString'), progress = $('#progress');
@@ -53,7 +98,8 @@ $(() => { FissionOpt().then((FissionOpt) => {
   const settings = new FissionOpt.FissionSettings();
   let lossElement, lossPlot, opt = null, timeout = null;
 
-  for (const [name, [power, heat]] of Object.entries(FUEL_PRESETS)) {
+  const fuelPresets = await loadFuelPresetsFromConfig();
+  for (const [name, [power, heat]] of Object.entries(fuelPresets)) {
     $('#' + name).click(() => {
       if (opt !== null)
         return;

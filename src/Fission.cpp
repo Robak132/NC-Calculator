@@ -7,14 +7,14 @@ namespace Fission {
     const double moderatorsFE = moderatorCellMultiplier * settings.modFEMult / 100.0;
     const double moderatorsHeat = moderatorCellMultiplier * settings.modHeatMult / 100.0;
     heat = settings.fuelBaseHeat * (cellsHeatMult + moderatorsHeat);
+    const double coolingPerTick = cooling + 1.0;
     power = settings.fuelBasePower * (cellsEnergyMult + moderatorsFE);
-    power = trunc(power * heatMultiplier(heat, cooling, settings.heatMult) * settings.FEGenMult / 10.0 * settings.genMult);
+    power = trunc(power * heatMultiplier(heat, coolingPerTick, settings.heatMult) * settings.FEGenMult / 10.0 * settings.genMult);
     netHeat = heat - cooling;
-    dutyCycle = std::min(1.0, cooling / heat);
-    avgPower = power * dutyCycle;
-    avgBreed = breed * dutyCycle;
-    double mult = fuelCellMultiplier > breed ? 1.0 * fuelCellMultiplier / breed : breed; // Silly double cast
-    efficiency = breed ? power / (settings.fuelBasePower * mult) : 1.0;
+    dutyCycle = netHeat <= 0.0 ? 1.0 : std::max(0.0, coolingPerTick / std::max(heat, 1.0));
+    avgPower = power;
+    avgBreed = breed;
+    efficiency = breed ? power / (settings.fuelBasePower * breed) : 0.0;
   }
 
   double Evaluation::heatMultiplier(const double heatPerTick, const double coolingPerTick, const double heatMult) {
@@ -31,7 +31,8 @@ namespace Fission {
     rules(xt::empty<int>({settings.sizeX, settings.sizeY, settings.sizeZ})),
     isActive(xt::empty<bool>({settings.sizeX, settings.sizeY, settings.sizeZ})),
     isModeratorInLine(xt::empty<bool>({settings.sizeX, settings.sizeY, settings.sizeZ})),
-    visited(xt::empty<bool>({settings.sizeX, settings.sizeY, settings.sizeZ})) {}
+    visited(xt::empty<bool>({settings.sizeX, settings.sizeY, settings.sizeZ})),
+    state(nullptr) {}
 
   int Evaluator::getTileSafe(int x, int y, int z) const {
     if (!state->in_bounds(x, y, z))
@@ -130,7 +131,8 @@ namespace Fission {
             ++result.breed;
             result.cellsHeatMult += (adjFuelCells + 1) * (adjFuelCells + 2) / 2;
             result.cellsEnergyMult += adjFuelCells + 1;
-            result.moderatorCellMultiplier += countActiveNeighbors(Moderator, x, y, z) * (adjFuelCells + 1);
+            // 1.20 logic counts direct adjacent moderator blocks for heat/FE bonuses.
+            result.moderatorCellMultiplier += countNeighbors(Moderator, x, y, z) * (adjFuelCells + 1);
           } else {
             if (tile < Cell) {
               rules(x, y, z) = tile;

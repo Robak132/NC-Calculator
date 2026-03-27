@@ -1,0 +1,22 @@
+if(NOT DEFINED FISSION_FUEL_DIR OR NOT DEFINED MANIFEST_OUT)
+  message(FATAL_ERROR "FISSION_FUEL_DIR and MANIFEST_OUT are required")
+endif()
+
+file(GLOB FUEL_JSON_FILES RELATIVE "${FISSION_FUEL_DIR}" "${FISSION_FUEL_DIR}/*.json")
+list(SORT FUEL_JSON_FILES)
+
+set(FILES_JSON "[\n")
+set(FIRST_ENTRY TRUE)
+foreach(FILE_NAME IN LISTS FUEL_JSON_FILES)
+  if(FILE_NAME STREQUAL "files.json")
+    continue()
+  endif()
+  if(NOT FIRST_ENTRY)
+    string(APPEND FILES_JSON ",\n")
+  endif()
+  string(APPEND FILES_JSON "  \"${FILE_NAME}\"")
+  set(FIRST_ENTRY FALSE)
+endforeach()
+string(APPEND FILES_JSON "\n]\n")
+
+file(WRITE "${MANIFEST_OUT}" "${FILES_JSON}")
