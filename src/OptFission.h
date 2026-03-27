@@ -48,6 +48,7 @@ namespace Fission {
     void mutateAndEvaluate(Sample &sample, int x, int y, int z);
   public:
     Opt(const Settings &settings, bool useNet);
+    ~Opt();
     void step();
     void stepInteractive();
     bool needsRedrawBest();

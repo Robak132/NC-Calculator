@@ -1,10 +1,13 @@
 # Suggested cmake binary directory
 build/
+.tmp
 
 # Output files generated in our source tree
 web/FissionOpt.js
 web/FissionOpt.wasm
 web/**/*.json
+
+app/fission-app
 
 .vscode/
 .idea/

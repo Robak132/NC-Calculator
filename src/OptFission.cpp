@@ -47,6 +47,8 @@ namespace Fission {
     evaluator.run(best.state, best.value);
   }
 
+  Opt::~Opt() = default;
+
   bool Opt::feasible(const Evaluation &x) const {
     return !settings.ensureHeatNeutral || x.netHeat <= 0.0;
   }
