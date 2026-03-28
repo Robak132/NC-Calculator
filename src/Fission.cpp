@@ -1,4 +1,5 @@
 #include <cmath>
+#include <limits>
 #include <xtensor/xview.hpp>
 #include "Fission.h"
 
@@ -31,10 +32,20 @@ namespace Fission {
     power = settings.fuelBasePower * (cellsEnergyMult + moderatorsFE);
     power = trunc(power * heatMultiplier(heat, coolingPerTick, settings.heatMult) * settings.FEGenMult / 10.0 * settings.genMult);
     netHeat = heat - cooling;
-    dutyCycle = netHeat <= 0.0 ? 1.0 : std::max(0.0, coolingPerTick / std::max(heat, 1.0));
-    avgPower = power;
-    avgBreed = breed;
+    if (netHeat <= 0.0) {
+      dutyCycle = 1.0;
+    } else {
+      const double safeHeat = std::max(heat, std::numeric_limits<double>::min());
+      const double strictUpperBound = std::nextafter(1.0, 0.0);
+      dutyCycle = std::min(strictUpperBound, std::max(0.0, cooling / safeHeat));
+    }
+    avgPower = power * dutyCycle;
+    avgBreed = breed * dutyCycle;
     efficiency = breed ? power / (settings.fuelBasePower * breed) : 0.0;
+    const double fullVolume = (settings.sizeX + 2.0) * (settings.sizeY + 2.0) * (settings.sizeZ + 2.0);
+    const double roundedLogVolume = std::round(std::log(fullVolume) * 10.0) / 10.0;
+    const double multiplier = std::max(1.0, roundedLogVolume - 1.0);
+    heatLimit = multiplier * 1'000'000.0;
   }
 
   double Evaluation::heatMultiplier(const double heatPerTick, const double coolingPerTick, const double heatMult) {
@@ -153,7 +164,6 @@ namespace Fission {
             ++result.breed;
             result.cellsHeatMult += (adjFuelCells + 1) * (adjFuelCells + 2) / 2;
             result.cellsEnergyMult += adjFuelCells + 1;
-            // 1.20 logic counts direct adjacent moderator blocks for heat/FE bonuses.
             result.moderatorCellMultiplier += countNeighbors(Moderator, x, y, z) * (adjFuelCells + 1);
           } else {
             if (tile < Cell) {

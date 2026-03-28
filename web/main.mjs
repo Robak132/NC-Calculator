@@ -139,11 +139,19 @@ $(() => { FissionOpt().then(async (FissionOpt) => {
 
   function displaySample(sample) {
     design.empty();
+    const shapes = [], strides = [], data = sample.getData();
+    for (let i = 0; i < 3; ++i) {
+      shapes.push(sample.getShape(i));
+      strides.push(sample.getStride(i));
+    }
+    const heatLimitMH = sample.getHeatLimit() / 1_000_000;
+
     let block = $('<div></div>');
     block.append(formatInfo('Max Power', sample.getPower(), 'FE/t'));
     block.append(formatInfo('Avg Power', sample.getAvgPower(), 'FE/t'));
     block.append(formatInfoGT('Max Power (GT)', sample.getPower() / 8192));
     block.append(formatInfoGT('Avg Power (GT)', sample.getAvgPower() / 8192));
+    block.append(formatInfo('Heat Limit', heatLimitMH, 'MH'));
     block.append(formatInfo('Heat', sample.getHeat(), 'H/t'));
     block.append(formatInfo('Cooling', sample.getCooling(), 'H/t'));
     block.append(formatInfo('Net Heat', sample.getNetHeat(), 'H/t'));
@@ -151,12 +159,6 @@ $(() => { FissionOpt().then(async (FissionOpt) => {
     block.append(formatInfo('Fuel Use Rate', sample.getAvgBreed(), '&times;'));
     block.append(formatInfo('Efficiency', sample.getEfficiency() * 100, '%'));
     design.append(block);
-
-    const shapes = [], strides = [], data = sample.getData();
-    for (let i = 0; i < 3; ++i) {
-      shapes.push(sample.getShape(i));
-      strides.push(sample.getStride(i));
-    }
     let resourceMap = {};
     resourceMap[-1] = (shapes[0] * shapes[1] + shapes[1] * shapes[2] + shapes[2] * shapes[0]) * 2 + (shapes[0] + shapes[1] + shapes[2]) * 4 + 8;
     for (let y = 0; y < shapes[0]; ++y) {

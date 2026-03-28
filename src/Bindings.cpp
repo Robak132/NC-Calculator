@@ -62,6 +62,10 @@ static double getEfficiency(const Fission::Sample &x) {
   return x.value.efficiency;
 }
 
+static double getHeatLimit(const Fission::Sample &x) {
+  return x.value.heatLimit;
+}
+
 static emscripten::val getLossHistory(const Fission::Opt &opt) {
   auto &data(opt.getLossHistory());
   return emscripten::val(emscripten::typed_memory_view(data.size(), data.data()));
@@ -98,7 +102,8 @@ EMSCRIPTEN_BINDINGS(FissionOpt) {
     .function("getDutyCycle", &getDutyCycle)
     .function("getAvgPower", &getAvgPower)
     .function("getAvgBreed", &getAvgBreed)
-    .function("getEfficiency", &getEfficiency);
+    .function("getEfficiency", &getEfficiency)
+    .function("getHeatLimit", &getHeatLimit);
   emscripten::class_<Fission::Opt>("FissionOpt")
     .constructor<const Fission::Settings&, bool>()
     .function("stepInteractive", &Fission::Opt::stepInteractive)

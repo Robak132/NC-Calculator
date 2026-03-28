@@ -56,7 +56,12 @@ namespace Fission {
   Opt::~Opt() = default;
 
   bool Opt::feasible(const Evaluation &x) const {
-    return !settings.ensureHeatNeutral || x.netHeat <= 0.0;
+    if (x.cooling <= 0.0)
+      return false;
+    if (settings.ensureHeatNeutral)
+      return x.netHeat <= 0.0;
+    // If reactor overheats in five seconds or less, it is not feasible
+    return x.netHeat * 100 <= x.heatLimit;
   }
 
   double Opt::rawFitness(const Evaluation &x) const {
@@ -71,18 +76,13 @@ namespace Fission {
   }
 
   double Opt::currentFitness(const Sample &x) const {
-    if (nStage == StageInfer) {
-      return net->infer(x);
-    } else if (nStage == StageTrain) {
-      return 0.0;
-    } else if (feasible(x.value)) {
-      return rawFitness(x.value);
-    } else {
-      return rawFitness(x.value) - x.value.netHeat / settings.fuelBaseHeat * infeasibilityPenalty;
-    }
+    if (nStage == StageInfer) return net->infer(x);
+    if (nStage == StageTrain) return 0.0;
+    if (feasible(x.value)) return rawFitness(x.value);
+    return rawFitness(x.value) - x.value.netHeat / settings.fuelBaseHeat * infeasibilityPenalty;
   }
 
-  int Opt::getNSym(int x, int y, int z) const {
+  int Opt::getNSym(const int x, const int y, const int z) const {
     int result(1);
     if (settings.symX && x != settings.sizeX - x - 1)
       result *= 2;
@@ -93,7 +93,7 @@ namespace Fission {
     return result;
   }
 
-  void Opt::setTileWithSym(Sample &sample, int x, int y, int z, int tile) const {
+  void Opt::setTileWithSym(Sample &sample, const int x, const int y, const int z, const int tile) const {
     sample.state(x, y, z) = tile;
     if (settings.symX) {
       sample.state(settings.sizeX - x - 1, y, z) = tile;
@@ -121,11 +121,12 @@ namespace Fission {
     }
   }
 
-  void Opt::mutateAndEvaluate(Sample &sample, int x, int y, int z) {
-    int nSym(getNSym(x, y, z));
-    int oldTile(sample.state(x, y, z));
-    if (oldTile != Air)
+  void Opt::mutateAndEvaluate(Sample &sample, const int x, const int y, const int z) {
+    int nSym = getNSym(x, y, z);
+    int oldTile = sample.state(x, y, z);
+    if (oldTile != Air) {
       sample.limit[oldTile] += nSym;
+    }
     allowedTiles.clear();
     allowedTiles.emplace_back(Air);
     for (int tile{}; tile < Air; ++tile)
@@ -225,8 +226,19 @@ namespace Fission {
     ++nConverge;
     ++nIteration;
     if (bestChangedLocal) {
-      for (auto &[x, y, z] : best.value.invalidTiles)
-        best.state(x, y, z) = Air;
+      bool removedInvalidTiles = false;
+      do {
+        removedInvalidTiles = false;
+        for (auto &[x, y, z] : best.value.invalidTiles)
+          if (best.state(x, y, z) != Air) {
+            best.state(x, y, z) = Air;
+            removedInvalidTiles = true;
+          }
+        if (removedInvalidTiles)
+          evaluator.run(best.state, best.value);
+      } while (removedInvalidTiles);
+      if (!best.value.invalidTiles.empty())
+        evaluator.run(best.state, best.value);
       bestChanged = true;
     }
   }
