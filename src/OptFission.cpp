@@ -9,6 +9,7 @@ namespace Fission {
     constexpr int Air = static_cast<int>(Tile::Air);
     constexpr int StageTrain = static_cast<int>(Stage::Train);
     constexpr int StageInfer = static_cast<int>(Stage::Infer);
+    constexpr double HeatPositiveMaxFraction = 0.9;
   }
 
   void Opt::restart() {
@@ -61,7 +62,7 @@ namespace Fission {
     if (settings.ensureHeatNeutral)
       return x.netHeat <= 0.0;
     // If reactor overheats in five seconds or less, it is not feasible
-    return x.netHeat * 100 <= x.heatLimit;
+    return x.netHeat * 100 <= x.heatLimit * HeatPositiveMaxFraction;
   }
 
   double Opt::rawFitness(const Evaluation &x) const {

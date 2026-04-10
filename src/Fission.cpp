@@ -31,10 +31,16 @@ namespace Fission {
     const double coolingPerTick = cooling + 1.0;
     power = settings.fuelBasePower * (cellsEnergyMult + moderatorsFE);
     power = trunc(power * heatMultiplier(heat, coolingPerTick, settings.heatMult) * settings.FEGenMult / 10.0 * settings.genMult);
+    const double fullVolume = (settings.sizeX + 2.0) * (settings.sizeY + 2.0) * (settings.sizeZ + 2.0);
+    const double roundedLogVolume = std::round(std::log(fullVolume) * 10.0) / 10.0;
+    const double multiplier = std::max(1.0, roundedLogVolume - 1.0);
+    heatLimit = multiplier * 1'000'000.0;
     netHeat = heat - cooling;
     if (netHeat <= 0.0) {
       dutyCycle = 1.0;
     } else {
+      // Heat-positive mode: run from 0 -> 90% heat, then cool from 90% -> 0.
+      // On-phase uses net heating (heat - cooling), off-phase uses full cooling.
       const double safeHeat = std::max(heat, std::numeric_limits<double>::min());
       const double strictUpperBound = std::nextafter(1.0, 0.0);
       dutyCycle = std::min(strictUpperBound, std::max(0.0, cooling / safeHeat));
@@ -42,10 +48,6 @@ namespace Fission {
     avgPower = power * dutyCycle;
     avgBreed = breed * dutyCycle;
     efficiency = breed ? power / (settings.fuelBasePower * breed) : 0.0;
-    const double fullVolume = (settings.sizeX + 2.0) * (settings.sizeY + 2.0) * (settings.sizeZ + 2.0);
-    const double roundedLogVolume = std::round(std::log(fullVolume) * 10.0) / 10.0;
-    const double multiplier = std::max(1.0, roundedLogVolume - 1.0);
-    heatLimit = multiplier * 1'000'000.0;
   }
 
   double Evaluation::heatMultiplier(const double heatPerTick, const double coolingPerTick, const double heatMult) {
